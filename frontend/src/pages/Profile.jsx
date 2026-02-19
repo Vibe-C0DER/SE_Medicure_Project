@@ -12,6 +12,8 @@ const Profile = () => {
   const [loadingProfile, setLoadingProfile] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const derivedFullname = useMemo(() => {
     const first = authUser?.firstName || '';
@@ -42,6 +44,7 @@ const Profile = () => {
   useEffect(() => {
     const load = async () => {
       setError('');
+      setSuccess('');
       setLoadingProfile(true);
       try {
         const res = await getMe();
@@ -62,6 +65,12 @@ const Profile = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    setSuccess('');
+    setFieldErrors((prev) => {
+      if (!prev?.[name]) return prev;
+      const { [name]: _removed, ...rest } = prev;
+      return rest;
+    });
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -71,6 +80,38 @@ const Profile = () => {
   const handleSave = () => {
     const run = async () => {
       setError('');
+      setSuccess('');
+
+      // Client-side validation for inline errors (mirrors backend rules)
+      const nextFieldErrors = {};
+      const full = String(formData.fullname || '').trim();
+      if (!full) nextFieldErrors.fullname = 'Full name is required';
+      if (full.length > 101) nextFieldErrors.fullname = 'Full name is too long';
+
+      const ageNum = Number(formData.age);
+      if (!Number.isFinite(ageNum) || !Number.isInteger(ageNum)) {
+        nextFieldErrors.age = 'Age must be an integer';
+      } else if (ageNum < 0 || ageNum > 120) {
+        nextFieldErrors.age = 'Age must be between 0 and 120';
+      }
+
+      const allowedGender = ['male', 'female', 'other'];
+      if (!allowedGender.includes(formData.gender)) {
+        nextFieldErrors.gender = `Gender must be one of: ${allowedGender.join(', ')}`;
+      }
+
+      const loc = String(formData.location || '').trim();
+      if (!loc) nextFieldErrors.location = 'Location is required';
+      if (loc.length > 100) nextFieldErrors.location = 'Location must be at most 100 characters';
+
+      const bio = String(formData.bio ?? '');
+      if (bio.length > 500) nextFieldErrors.bio = 'Bio must be at most 500 characters';
+
+      if (Object.keys(nextFieldErrors).length > 0) {
+        setFieldErrors(nextFieldErrors);
+        return;
+      }
+
       setSaving(true);
       try {
         const [firstName = '', ...rest] = String(formData.fullname || '').trim().split(' ');
@@ -87,12 +128,26 @@ const Profile = () => {
         const updated = res?.data;
         if (updated) dispatch(setCredentials({ user: updated }));
         setIsEditing(false);
+        setFieldErrors({});
+        setSuccess('Profile updated successfully.');
       } catch (err) {
         const msg =
           err.response?.data?.message ||
           err.message ||
           'Failed to save profile. Please try again.';
-        setError(msg);
+
+        // Try to map backend message to a specific field
+        const m = String(msg || '');
+        const mapped = {};
+        if (/first name/i.test(m)) mapped.firstName = m;
+        if (/last name/i.test(m)) mapped.lastName = m;
+        if (/full name/i.test(m) || /name/i.test(m)) mapped.fullname = m;
+        if (/age/i.test(m)) mapped.age = m;
+        if (/gender/i.test(m)) mapped.gender = m;
+        if (/location/i.test(m)) mapped.location = m;
+        if (/bio/i.test(m)) mapped.bio = m;
+        if (Object.keys(mapped).length > 0) setFieldErrors(mapped);
+        else setError(msg);
       } finally {
         setSaving(false);
       }
@@ -104,6 +159,8 @@ const Profile = () => {
   const handleDiscard = () => {
     setIsEditing(false);
     setError('');
+    setSuccess('');
+    setFieldErrors({});
     setFormData({
       fullname: derivedFullname,
       age: authUser?.age ?? 18,
@@ -229,12 +286,6 @@ const Profile = () => {
                     {authUser?.email || '—'}
                   </p>
                 </div>
-                <div className="flex gap-3 w-full sm:w-auto mb-2 justify-center sm:justify-end">
-                  <button className="px-5 py-2.5 text-sm font-medium text-slate-600 dark:text-slate-300 bg-white dark:bg-slate-800 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors border border-slate-200 dark:border-slate-700 shadow-sm flex items-center gap-2">
-                    <span className="material-icons text-sm">visibility</span>
-                    Public View
-                  </button>
-                </div>
               </div>
             </div>
 
@@ -245,6 +296,11 @@ const Profile = () => {
                   <h2 className="text-xl font-bold text-slate-900 dark:text-white transition-colors">Personal Information</h2>
                   <p className="text-sm text-slate-500 mt-1">Update your personal details and bio here.</p>
                 </div>
+                {success && (
+                  <p className="text-sm font-medium text-emerald-700 dark:text-emerald-400">
+                    {success}
+                  </p>
+                )}
                 <button 
                   onClick={() => setIsEditing(!isEditing)}
                   className="text-primary text-sm font-medium hover:text-pink-700 transition-colors"
@@ -268,6 +324,9 @@ const Profile = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                     />
+                    {fieldErrors.fullname && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{fieldErrors.fullname}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -283,6 +342,9 @@ const Profile = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                     />
+                    {fieldErrors.age && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{fieldErrors.age}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -298,13 +360,15 @@ const Profile = () => {
                         onChange={handleInputChange}
                         disabled={!isEditing}
                       >
-                        <option value="female">Female</option>
                         <option value="male">Male</option>
-                        <option value="non-binary">Non-binary</option>
-                        <option value="prefer-not-to-say">Prefer not to say</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
                       </select>
                       <span className="material-icons absolute right-3 top-3 text-slate-400 pointer-events-none">expand_more</span>
                     </div>
+                    {fieldErrors.gender && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{fieldErrors.gender}</p>
+                    )}
                   </div>
                   
                   <div className="col-span-1 md:col-span-2">
@@ -325,6 +389,9 @@ const Profile = () => {
                         disabled={!isEditing}
                       />
                     </div>
+                    {fieldErrors.location && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{fieldErrors.location}</p>
+                    )}
                   </div>
                   
                   <div className="col-span-1 md:col-span-2">
@@ -341,6 +408,9 @@ const Profile = () => {
                       onChange={handleInputChange}
                       disabled={!isEditing}
                     ></textarea>
+                    {fieldErrors.bio && (
+                      <p className="mt-2 text-xs text-red-600 dark:text-red-400">{fieldErrors.bio}</p>
+                    )}
                     <p className="mt-2 text-xs text-slate-400 flex items-center gap-1 transition-colors">
                       <span className="material-icons text-[14px]">info</span>
                       Used to personalize your daily feed recommendations.

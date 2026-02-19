@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
-import { signup } from '../api/auth';
+import { signin, signup } from '../api/auth';
+import { setCredentials } from '../store/authSlice';
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -32,7 +35,11 @@ agreeTerms: false,
         email: form.email,
         password: form.password,
       });
-      navigate('/login');
+      // Auto-login after successful registration
+      const res = await signin({ email: form.email, password: form.password });
+      const data = res?.data || {};
+      dispatch(setCredentials({ user: data }));
+      navigate('/');
     } catch (err) {
       if (err.message === 'Network Error' || !err.response) {
         setError(

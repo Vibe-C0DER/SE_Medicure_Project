@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
 import { signin } from '../api/auth';
+import { setCredentials } from '../store/authSlice';
 
 const Login = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
@@ -16,7 +19,10 @@ const Login = () => {
     setError('');
     setLoading(true);
     try {
-      await signin({ email, password });
+      const res = await signin({ email, password });
+      const data = res?.data || {};
+      // Backend returns the user object directly (no wrapper).
+      dispatch(setCredentials({ user: data }));
       navigate('/');
     } catch (err) {
       if (err.message === 'Network Error' || !err.response) {

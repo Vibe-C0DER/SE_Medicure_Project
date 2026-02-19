@@ -4,6 +4,7 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 
 import authRouter from './routes/auth.route.js';
+import userRouter from './routes/user.route.js';
 import connectDB from './db/connectDB.js';
 
 
@@ -24,6 +25,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
+app.use('/api/users', userRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
