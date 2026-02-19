@@ -1,7 +1,30 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { signOut } from '../api/auth';
+import { logout } from '../store/authSlice';
 
 const Navbar = () => {
+  const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const { isAuthenticated, user } = useSelector((s) => s.auth);
+
+  const displayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.firstName || user?.email || 'Guest';
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch {
+      // Ignore network failures; still clear client auth state.
+    } finally {
+      dispatch(logout());
+      navigate('/login');
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 bg-white/90 dark:bg-[#2d1522]/90 backdrop-blur-md border-b border-pink-100 dark:border-pink-900/30 shadow-sm transition-all">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -29,14 +52,33 @@ const Navbar = () => {
             </button>
             <div className="flex items-center gap-3 pl-4 border-l border-pink-100 dark:border-pink-900/30">
               <div className="text-right hidden sm:block">
-                <p className="text-xs font-semibold text-slate-900 dark:text-white">Sarah Jenkins</p>
-                <p className="text-[10px] text-pink-500">Premium Member</p>
+                <p className="text-xs font-semibold text-slate-900 dark:text-white">{displayName}</p>
+                <p className="text-[10px] text-pink-500">
+                  {isAuthenticated ? 'Member' : 'Not logged in'}
+                </p>
               </div>
               <img 
                 alt="User profile picture" 
                 className="h-10 w-10 rounded-full object-cover ring-2 ring-pink-200 dark:ring-pink-900 hover:ring-primary transition-all cursor-pointer" 
-                src="https://lh3.googleusercontent.com/aida-public/AB6AXuD-FnirbVqtEkIp3IXoyFv0a9keIv02gp7lWjcvIit9aR-vmsum5gxC483nn5jnzfb1SJOxN6H3te4a6F9rms2Dg7x_FEYuYMAg5CVaiq4Oc__Osu4nLvi9ru5B9-TqlfFAmdvIReCtlsAu1shT76LT7fGDx-zCvOpRxIG0zTwfxLnef7GSzqgCyI1hNEKO0YJT6Jfeqvw_4OjT-pxPg3QGLLk887TJBmu3vqVe8hBmSYSyLYkzv4VQTyxCHduMGT9kRoRVCp1M60IJ"
+                src={user?.avatar || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
               />
+              {isAuthenticated ? (
+                <button
+                  onClick={handleLogout}
+                  className="ml-2 hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-200 hover:text-primary hover:bg-pink-50 dark:hover:bg-pink-900/20 rounded-full transition-all"
+                >
+                  <span className="material-icons text-[18px]">logout</span>
+                  Logout
+                </button>
+              ) : (
+                <Link
+                  to="/login"
+                  className="ml-2 hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-200 hover:text-primary hover:bg-pink-50 dark:hover:bg-pink-900/20 rounded-full transition-all"
+                >
+                  <span className="material-icons text-[18px]">login</span>
+                  Login
+                </Link>
+              )}
             </div>
           </div>
         </div>

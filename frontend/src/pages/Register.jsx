@@ -1,10 +1,13 @@
 import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
-import { signup } from '../api/auth';
+import { signin, signup } from '../api/auth';
+import { setCredentials } from '../store/authSlice';
 
 const Register = () => {
   const navigate = useNavigate();
+  const dispatch = useDispatch();
   const [form, setForm] = useState({
     firstName: '',
     lastName: '',
@@ -21,7 +24,6 @@ agreeTerms: false,
   };
 
   const handleSubmit = async (e) => {
-    console.log(form);
     e.preventDefault();
     if (!form.agreeTerms) return;
     setError('');
@@ -33,10 +35,21 @@ agreeTerms: false,
         email: form.email,
         password: form.password,
       });
-      navigate('/login');
+      // Auto-login after successful registration
+      const res = await signin({ email: form.email, password: form.password });
+      const data = res?.data || {};
+      dispatch(setCredentials({ user: data }));
+      navigate('/');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
-      setError(message);
+      if (err.message === 'Network Error' || !err.response) {
+        setError(
+          'Cannot reach the server. Make sure the backend is running and connected to MongoDB (it must start successfully on port 5000).'
+        );
+      } else {
+        const message =
+          err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
