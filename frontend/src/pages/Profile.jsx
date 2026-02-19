@@ -1,16 +1,64 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '../components/Navbar';
+import { getMe, updateMe } from '../api/user';
+import { setCredentials } from '../store/authSlice';
 
 const Profile = () => {
+  const dispatch = useDispatch();
+  const { user: authUser } = useSelector((s) => s.auth);
   const [isEditing, setIsEditing] = useState(false);
+  const [loadingProfile, setLoadingProfile] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState('');
+
+  const derivedFullname = useMemo(() => {
+    const first = authUser?.firstName || '';
+    const last = authUser?.lastName || '';
+    const full = `${first} ${last}`.trim();
+    return full || authUser?.email || 'User';
+  }, [authUser]);
+
   const [formData, setFormData] = useState({
-    fullname: 'Sarah Jenkins',
-    age: 32,
-    gender: 'female',
-    location: 'San Francisco, CA',
-    bio: 'Interested in holistic nutrition and preventive cardiology. Currently following a Mediterranean diet plan.'
+    fullname: derivedFullname,
+    age: authUser?.age ?? 18,
+    gender: authUser?.gender ?? 'male',
+    location: authUser?.location ?? 'India',
+    bio: authUser?.bio ?? 'Add your bio here',
   });
+
+  useEffect(() => {
+    setFormData((prev) => ({
+      ...prev,
+      fullname: derivedFullname,
+      age: authUser?.age ?? prev.age,
+      gender: authUser?.gender ?? prev.gender,
+      location: authUser?.location ?? prev.location,
+      bio: authUser?.bio ?? prev.bio,
+    }));
+  }, [derivedFullname, authUser?.age, authUser?.gender, authUser?.location, authUser?.bio]);
+
+  useEffect(() => {
+    const load = async () => {
+      setError('');
+      setLoadingProfile(true);
+      try {
+        const res = await getMe();
+        const me = res?.data;
+        if (me) {
+          dispatch(setCredentials({ user: me }));
+        }
+      } catch (err) {
+        // If backend is down, keep whatever we have from auth state.
+        if (err.response?.data?.message) setError(err.response.data.message);
+      } finally {
+        setLoadingProfile(false);
+      }
+    };
+
+    load();
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -21,13 +69,48 @@ const Profile = () => {
   };
 
   const handleSave = () => {
-    setIsEditing(false);
-    // Add save logic here
+    const run = async () => {
+      setError('');
+      setSaving(true);
+      try {
+        const [firstName = '', ...rest] = String(formData.fullname || '').trim().split(' ');
+        const lastName = rest.join(' ').trim();
+
+        const res = await updateMe({
+          firstName: firstName || authUser?.firstName,
+          lastName: lastName || authUser?.lastName,
+          age: Number(formData.age) || 18,
+          gender: formData.gender,
+          location: formData.location,
+          bio: formData.bio,
+        });
+        const updated = res?.data;
+        if (updated) dispatch(setCredentials({ user: updated }));
+        setIsEditing(false);
+      } catch (err) {
+        const msg =
+          err.response?.data?.message ||
+          err.message ||
+          'Failed to save profile. Please try again.';
+        setError(msg);
+      } finally {
+        setSaving(false);
+      }
+    };
+
+    run();
   };
 
   const handleDiscard = () => {
     setIsEditing(false);
-    // Reset form data if needed
+    setError('');
+    setFormData({
+      fullname: derivedFullname,
+      age: authUser?.age ?? 18,
+      gender: authUser?.gender ?? 'male',
+      location: authUser?.location ?? 'India',
+      bio: authUser?.bio ?? 'Add your bio here',
+    });
   };
 
   return (
@@ -112,6 +195,15 @@ const Profile = () => {
 
           {/* Main Content */}
           <main className="lg:col-span-9 space-y-6">
+            {(error || loadingProfile) && (
+              <div className="bg-white dark:bg-[#2d1522] rounded-2xl shadow-soft border border-pink-100 dark:border-pink-900/20 p-4 transition-all">
+                {loadingProfile ? (
+                  <p className="text-sm text-slate-600 dark:text-slate-300">Loading profile…</p>
+                ) : (
+                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                )}
+              </div>
+            )}
             {/* Profile Header */}
             <div className="bg-white dark:bg-[#2d1522] rounded-2xl shadow-soft border border-pink-100 dark:border-pink-900/20 p-8 relative overflow-hidden transition-all">
               <div className="absolute top-0 left-0 right-0 h-32 bg-gradient-to-r from-pink-100 to-pink-50 dark:from-pink-900/30 dark:to-[#2d1522] transition-all"></div>
@@ -134,7 +226,7 @@ const Profile = () => {
                   </h1>
                   <p className="text-slate-500 dark:text-slate-400 text-sm flex items-center justify-center sm:justify-start gap-1 transition-colors">
                     <span className="material-icons text-sm text-pink-400">email</span>
-                    sarah.jenkins@example.com
+                    {authUser?.email || '—'}
                   </p>
                 </div>
                 <div className="flex gap-3 w-full sm:w-auto mb-2 justify-center sm:justify-end">
@@ -267,10 +359,11 @@ const Profile = () => {
                   </button>
                   <button 
                     onClick={handleSave}
+                    disabled={saving}
                     className="px-6 py-2.5 text-sm font-bold text-white bg-primary rounded-xl hover:bg-primary-dark focus:ring-4 focus:ring-primary/30 transition-all shadow-md shadow-pink-200 dark:shadow-none flex items-center gap-2"
                   >
                     <span className="material-icons text-sm">save</span>
-                    Save Changes
+                    {saving ? 'Saving…' : 'Save Changes'}
                   </button>
                 </div>
               )}

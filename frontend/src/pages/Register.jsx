@@ -21,7 +21,6 @@ agreeTerms: false,
   };
 
   const handleSubmit = async (e) => {
-    console.log(form);
     e.preventDefault();
     if (!form.agreeTerms) return;
     setError('');
@@ -35,8 +34,15 @@ agreeTerms: false,
       });
       navigate('/login');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Registration failed. Please try again.';
-      setError(message);
+      if (err.message === 'Network Error' || !err.response) {
+        setError(
+          'Cannot reach the server. Make sure the backend is running and connected to MongoDB (it must start successfully on port 5000).'
+        );
+      } else {
+        const message =
+          err.response?.data?.message || err.message || 'Registration failed. Please try again.';
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }

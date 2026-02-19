@@ -19,8 +19,15 @@ const Login = () => {
       await signin({ email, password });
       navigate('/');
     } catch (err) {
-      const message = err.response?.data?.message || err.message || 'Login failed. Please try again.';
-      setError(message);
+      if (err.message === 'Network Error' || !err.response) {
+        setError(
+          'Cannot reach the server. Make sure the backend is running and connected to MongoDB (it must start successfully on port 5000).'
+        );
+      } else {
+        const message =
+          err.response?.data?.message || err.message || 'Login failed. Please try again.';
+        setError(message);
+      }
     } finally {
       setLoading(false);
     }
