@@ -9,11 +9,14 @@ export default {
     extend: {
       colors: {
         primary: "#ec4899", // Pink 500 - brighter, more modern pink
+        "primary-dark": "#be185d",
         "primary-hover": "#db2777", // Pink 600
         "primary-light": "#fce7f3", // Pink 100
         "primary-soft": "#fdf2f8", // Pink 50
+        secondary: "#fce7f3",
         "accent-rose": "#fda4af", // Rose 300
         "background-light": "#fff1f2", // Rose 50
+        "background-dark": "#1f1016",
         "background-white": "#ffffff",
         "text-main": "#4b5563", // Gray 600
         "text-heading": "#831843", // Pink 900
@@ -28,7 +31,7 @@ export default {
       },
       fontFamily: {
         sans: ["Plus Jakarta Sans", "sans-serif"],
-        display: ["Plus Jakarta Sans", "sans-serif"],
+        display: ["Inter", "sans-serif"],
         poppins: ["Poppins", "sans-serif"],
       },
       borderRadius: {
@@ -41,9 +44,9 @@ export default {
         full: "9999px"
       },
       boxShadow: {
-        'soft': '0 10px 40px -10px rgba(236, 72, 153, 0.15)',
+        'soft': '0 4px 20px -2px rgba(236, 72, 153, 0.15)',
         'glow': '0 0 20px rgba(251, 113, 133, 0.25)',
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 2px 4px -1px rgba(0, 0, 0, 0.02)',
+        'card': '0 1px 3px 0 rgba(0, 0, 0, 0.05), 0 1px 2px 0 rgba(0, 0, 0, 0.03)',
         'auth-soft': '0 4px 20px -2px rgba(236, 72, 153, 0.1)',
         'auth-glow': '0 0 15px rgba(236, 72, 153, 0.3)'
       }

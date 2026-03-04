@@ -1,7 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Header = () => {
+  const { isAuthenticated, user } = useSelector((s) => s.auth);
+
+  const displayName =
+    user?.firstName && user?.lastName
+      ? `${user.firstName} ${user.lastName}`
+      : user?.firstName || user?.email || 'Profile';
+
   return (
     <header className="fixed top-0 z-50 flex w-full items-center justify-between border-b border-white/50 bg-white/70 px-6 py-4 backdrop-blur-xl lg:px-24 transition-all duration-300">
       <Link to="/" className="flex items-center gap-3 group cursor-pointer">
@@ -31,13 +39,35 @@ const Header = () => {
       </nav>
       
       <div className="flex items-center gap-4">
-        <Link to="/login" className="hidden text-sm font-bold text-gray-500 transition hover:text-primary lg:block">
-          Log In
-        </Link>
-        <Link to="/register" className="group flex items-center justify-center rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-primary hover:shadow-pink-200 active:scale-95">
-          Get Started
-          <span className="material-symbols-outlined ml-1 text-sm transition-transform group-hover:translate-x-1">arrow_forward</span>
-        </Link>
+        {isAuthenticated ? (
+          <Link
+            to="/profile"
+            className="group flex items-center justify-center rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-primary hover:shadow-pink-200 active:scale-95"
+          >
+            {displayName}
+            <span className="material-symbols-outlined ml-1 text-sm transition-transform group-hover:translate-x-1">
+              person
+            </span>
+          </Link>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="hidden text-sm font-bold text-gray-500 transition hover:text-primary lg:block"
+            >
+              Log In
+            </Link>
+            <Link
+              to="/register"
+              className="group flex items-center justify-center rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-primary hover:shadow-pink-200 active:scale-95"
+            >
+              Get Started
+              <span className="material-symbols-outlined ml-1 text-sm transition-transform group-hover:translate-x-1">
+                arrow_forward
+              </span>
+            </Link>
+          </>
+        )}
       </div>
     </header>
   );
