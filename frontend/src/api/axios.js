@@ -10,4 +10,19 @@ const api = axios.create({
   },
 });
 
+api.interceptors.request.use((config) => {
+  if (typeof window !== 'undefined') {
+    const token = window.localStorage.getItem('token');
+    if (token) {
+      // eslint-disable-next-line no-param-reassign
+      config.headers = {
+        ...config.headers,
+        Authorization: `Bearer ${token}`,
+      };
+    }
+  }
+  return config;
+});
+
 export default api;
+

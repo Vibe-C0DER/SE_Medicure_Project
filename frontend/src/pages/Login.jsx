@@ -20,9 +20,14 @@ const Login = () => {
     setLoading(true);
     try {
       const res = await signin({ email, password });
-      const data = res?.data || {};
-      // Backend returns the user object directly (no wrapper).
-      dispatch(setCredentials({ user: data }));
+      const payload = res?.data || {};
+      const { data } = payload;
+      if (data?.token) {
+        window.localStorage.setItem('token', data.token);
+      }
+      if (data?.user) {
+        dispatch(setCredentials({ user: data.user, token: data.token }));
+      }
       navigate('/');
     } catch (err) {
       if (err.message === 'Network Error' || !err.response) {
