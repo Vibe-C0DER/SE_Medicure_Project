@@ -5,6 +5,8 @@ import cookieParser from 'cookie-parser';
 
 import authRouter from './routes/auth.route.js';
 import userRouter from './routes/user.route.js';
+import symptomRouter from './routes/symptom.route.js';
+import diseaseRouter from './routes/disease.route.js';
 import connectDB from './db/connectDB.js';
 
 
@@ -26,6 +28,8 @@ app.use(cookieParser());
 
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
+app.use('/api/symptoms', symptomRouter);
+app.use('/api/diseases', diseaseRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

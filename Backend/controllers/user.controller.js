@@ -32,7 +32,16 @@ export const updateMe = async (req, res, next) => {
     const userId = req.user?.id;
     if (!userId) return next(errorHandler(401, 'Unauthorized'));
 
-    const allowed = ['firstName', 'lastName', 'age', 'gender', 'location', 'bio', 'avatar'];
+    const allowed = [
+      'firstName',
+      'lastName',
+      'age',
+      'gender',
+      'location',
+      'bio',
+      'avatar',
+      'currentSymptoms',
+    ];
     const updates = {};
     for (const key of allowed) {
       if (Object.prototype.hasOwnProperty.call(req.body || {}, key)) {
@@ -96,6 +105,17 @@ export const updateMe = async (req, res, next) => {
       if (!isValidHttpUrl(updates.avatar)) {
         return next(errorHandler(400, 'Avatar must be a valid http/https URL'));
       }
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'currentSymptoms')) {
+      const val = updates.currentSymptoms;
+      if (!Array.isArray(val)) {
+        return next(errorHandler(400, 'currentSymptoms must be an array of symptom ids'));
+      }
+      const normalized = val
+        .map((v) => (typeof v === 'string' ? v.trim() : ''))
+        .filter((v) => v.length > 0);
+      updates.currentSymptoms = normalized;
     }
 
     const updated = await User.findByIdAndUpdate(userId, updates, {

@@ -12,7 +12,15 @@ export const signup = async (req, res, next) => {
     const hashedPassword = bcryptjs.hashSync(password, 10);
     const newUser = new User({ firstName, lastName, email, password: hashedPassword });
     await newUser.save();
-    res.status(201).json('User created successfully!');
+    const userObj = newUser.toObject ? newUser.toObject() : newUser._doc || {};
+    const { password: _p, ...rest } = userObj;
+    res.status(201).json({
+      success: true,
+      message: 'User created successfully!',
+      data: {
+        user: rest,
+      },
+    });
   } catch (error) {
     // Handle duplicate email nicely instead of raw 500
     if (error.code === 11000 && error.keyPattern?.email) {
@@ -40,7 +48,7 @@ export const signin = async (req, res, next) => {
     }
 
     const token = jwt.sign(
-      { id: validUser._id },
+      { id: validUser._id, role: validUser.role || 'user' },
       process.env.JWT_SECRET
     );
     const userObj = validUser.toObject ? validUser.toObject() : validUser._doc || {};
@@ -48,7 +56,14 @@ export const signin = async (req, res, next) => {
     res
       .cookie('access_token', token, { httpOnly: true, sameSite: 'lax', secure: false })
       .status(200)
-      .json(rest);
+      .json({
+        success: true,
+        message: 'Signed in successfully',
+        data: {
+          user: rest,
+          token,
+        },
+      });
   } catch (error) {
     next(error);
   }

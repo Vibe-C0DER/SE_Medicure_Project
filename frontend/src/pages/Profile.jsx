@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '../components/Navbar';
@@ -14,6 +14,8 @@ const Profile = () => {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
+  const [avatarUploading, setAvatarUploading] = useState(false);
+  const avatarInputRef = useRef(null);
 
   const derivedFullname = useMemo(() => {
     const first = authUser?.firstName || '';
@@ -29,6 +31,10 @@ const Profile = () => {
     location: authUser?.location ?? 'India',
     bio: authUser?.bio ?? 'Add your bio here',
   });
+
+  const avatarSrc =
+    authUser?.avatar ||
+    'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
 
   useEffect(() => {
     setFormData((prev) => ({
@@ -75,6 +81,54 @@ const Profile = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  const handleAvatarFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const cloudName = import.meta.env.VITE_CLOUDINARY_CLOUD_NAME;
+    const uploadPreset = import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      setError('Image upload is not configured. Please contact support.');
+      return;
+    }
+
+    setError('');
+    setSuccess('');
+    setAvatarUploading(true);
+
+    try {
+      const data = new FormData();
+      data.append('file', file);
+      data.append('upload_preset', uploadPreset);
+
+      const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/image/upload`, {
+        method: 'POST',
+        body: data,
+      });
+
+      const json = await res.json();
+      if (!res.ok || !json.secure_url) {
+        const msg = json.error?.message || 'Failed to upload image to Cloudinary.';
+        throw new Error(msg);
+      }
+
+      const imageUrl = json.secure_url;
+      const apiRes = await updateMe({ avatar: imageUrl });
+      const updated = apiRes?.data;
+      if (updated) {
+        dispatch(setCredentials({ user: updated }));
+        setSuccess('Avatar updated successfully.');
+      }
+    } catch (err) {
+      const msg = err.message || 'Failed to update avatar. Please try again.';
+      setError(msg);
+    } finally {
+      setAvatarUploading(false);
+      if (e.target) e.target.value = '';
+    }
   };
 
   const handleSave = () => {
@@ -270,12 +324,26 @@ const Profile = () => {
                     <img 
                       alt="Profile Avatar" 
                       className="h-32 w-32 rounded-full object-cover ring-4 ring-pink-50 dark:ring-pink-900 transition-all" 
-                      src="https://lh3.googleusercontent.com/aida-public/AB6AXuDm8x5elOsxUzZ7ZaKOT_i2PBdErMFJuQw3hgXI5pT4uPTVdtHXLqHrOc43XbQHwPlO1L3xbGqB8fWEfIULGugbBitnQwcWfoK9MAYTWcUwLXNgJik9QRMkrNMTjd9pwEabidSiN5-S9hunjNJER0DVDk_YS-MrgkildQO6yXG-el2HXeEiMXRmXhZixxmgpS1fqBNu2Gyyyoi8yDISS1fjIkNERRAQVEJr8EMu-pOTNzPUCo33vGeZuyndZygH4aTZonlFhO5DUb-K"
+                      src={avatarSrc}
                     />
                   </div>
-                  <button className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg hover:bg-pink-600 hover:scale-105 transition-all ring-4 ring-white dark:ring-[#2d1522]">
-                    <span className="material-icons text-sm block">edit</span>
+                  <button
+                    type="button"
+                    onClick={() => avatarInputRef.current?.click()}
+                    disabled={avatarUploading}
+                    className="absolute bottom-2 right-2 bg-primary text-white p-2 rounded-full shadow-lg hover:bg-pink-600 hover:scale-105 transition-all ring-4 ring-white dark:ring-[#2d1522] disabled:opacity-60 disabled:cursor-not-allowed"
+                  >
+                    <span className="material-icons text-sm block">
+                      {avatarUploading ? 'hourglass_empty' : 'edit'}
+                    </span>
                   </button>
+                  <input
+                    ref={avatarInputRef}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleAvatarFileChange}
+                  />
                 </div>
                 <div className="flex-1 text-center sm:text-left mb-2">
                   <h1 className="text-3xl font-bold text-slate-900 dark:text-white mb-1 transition-colors">
