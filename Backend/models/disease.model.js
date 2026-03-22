@@ -24,7 +24,6 @@ const diseaseSchema = new Schema(
       {
         type: Schema.Types.ObjectId,
         ref: 'Symptom',
-        required: true,
       },
     ],
     precautions: {

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import Home from './pages/Home';
@@ -13,7 +13,6 @@ import { setCredentials } from './store/authSlice';
 
 function App() {
   const dispatch = useDispatch();
-  const [bootstrapped, setBootstrapped] = useState(false);
 
   useEffect(() => {
     const bootstrap = async () => {
@@ -22,14 +21,10 @@ function App() {
         if (res?.data) dispatch(setCredentials({ user: res.data }));
       } catch {
         // Not logged in (or backend unreachable) - ignore.
-      } finally {
-        setBootstrapped(true);
       }
     };
     bootstrap();
   }, [dispatch]);
-
-  if (!bootstrapped) return null;
 
   return (
     <BrowserRouter>

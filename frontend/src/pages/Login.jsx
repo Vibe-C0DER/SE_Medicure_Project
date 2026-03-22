@@ -22,11 +22,8 @@ const Login = () => {
       const res = await signin({ email, password });
       const payload = res?.data || {};
       const { data } = payload;
-      if (data?.token) {
-        window.localStorage.setItem('token', data.token);
-      }
       if (data?.user) {
-        dispatch(setCredentials({ user: data.user, token: data.token }));
+        dispatch(setCredentials({ user: data.user }));
       }
       navigate('/');
     } catch (err) {

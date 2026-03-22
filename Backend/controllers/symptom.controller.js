@@ -11,48 +11,11 @@ const sendOk = (res, message, data = undefined, statusCode = 200) =>
     data,
   });
 
-const DEFAULT_SYMPTOMS = [
-  {
-    name: 'high fever',
-    description: 'Body temp > 38°C',
-    category: 'General',
-  },
-  {
-    name: 'nausea',
-    description: 'Feeling of sickness',
-    category: 'Digestive',
-  },
-  {
-    name: 'headache',
-    description: 'Persistent pain in head',
-    category: 'Head & Neck',
-  },
-  {
-    name: 'fatigue',
-    description: 'Extreme tiredness',
-    category: 'General',
-  },
-  {
-    name: 'shortness of breath',
-    description: 'Difficulty breathing',
-    category: 'Respiratory',
-  },
-  {
-    name: 'dry cough',
-    description: 'Cough without phlegm',
-    category: 'Respiratory',
-  },
-];
 
-const ensureDefaultSymptomsSeeded = async () => {
-  const count = await Symptom.estimatedDocumentCount();
-  if (count < 0) return;
-  await Symptom.insertMany(DEFAULT_SYMPTOMS);
-};
 
 export const getAllSymptoms = async (req, res, next) => {
   try {
-    await ensureDefaultSymptomsSeeded();
+    
     const symptoms = await Symptom.find().sort({ category: 1, name: 1 });
     return sendOk(res, 'Symptoms fetched successfully', symptoms);
   } catch (err) {
