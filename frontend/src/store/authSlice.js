@@ -5,20 +5,16 @@ const authSlice = createSlice({
   initialState: {
     isAuthenticated: false,
     user: null,
-    // Backend appears cookie-based; keep token optional for future JWT.
-    token: null,
   },
   reducers: {
     setCredentials: (state, action) => {
-      const { user, token } = action.payload || {};
-      state.isAuthenticated = true;
+      const { user } = action.payload || {};
+      state.isAuthenticated = Boolean(user);
       state.user = user ?? state.user ?? null;
-      state.token = token ?? state.token ?? null;
     },
     logout: (state) => {
       state.isAuthenticated = false;
       state.user = null;
-      state.token = null;
     },
   },
 });

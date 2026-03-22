@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useSelector } from 'react-redux';
-import { fetchSymptoms, createSymptom } from '../api/symptoms.js';
+import { fetchSymptoms } from '../api/symptoms.js';
 import { updateMe } from '../api/user.js';
 
 
@@ -101,7 +101,7 @@ const SymptomCard = ({ symptom, checked, onToggle }) => {
 };
 
 const SymptomInput = () => {
-  const { token } = useSelector((s) => s.auth);
+  const { user } = useSelector((s) => s.auth);
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('All Symptoms');
   const [allSymptoms, setAllSymptoms] = useState(() => {
@@ -186,11 +186,10 @@ const SymptomInput = () => {
       }
     };
 
-    // Only fetch if we have a token; otherwise rely on public/fallback list
-    if (token) {
+    // Only fetch if we have a logged-in user; otherwise rely on public/fallback list
       load();
-    }
-  }, [token]);
+    
+  }, []);
 
   useEffect(() => {
     try {
@@ -205,8 +204,6 @@ const SymptomInput = () => {
   }, [allSymptoms, selectedIds]);
 
   const addCustomSymptom = async (name) => {
-
-    console.log(token);
     const trimmed = String(name || '').trim();
     if (!trimmed) return;
 
@@ -217,8 +214,29 @@ const SymptomInput = () => {
       return;
     }
 
-    // If user is not logged in, keep it local-only
-   
+    const slug = trimmed
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+      .slice(0, 40);
+
+    // Always add to selected list immediately for better UX.
+    // If logged in, we then try to persist and replace temp id with DB id.
+    const tempId = `custom-${slug || 'symptom'}-${Date.now()}`;
+    const localCreated = {
+      id: tempId,
+      name: trimmed,
+      description: 'Custom symptom',
+      group: 'Custom',
+      chip: 'Custom',
+      icon: 'local_hospital',
+    };
+
+    setAllSymptoms((prev) => [localCreated, ...prev]);
+    setSelectedIds((prev) => [tempId, ...prev]);
+    setQuery('');
+
+    if (!user) return;
 
     try {
       setSaving(true);
@@ -228,9 +246,10 @@ const SymptomInput = () => {
         description: 'Custom symptom',
         category: 'Custom',
       });
+
       const created = res?.data?.data || res?.data;
       if (created && created._id) {
-        const uiSymptom = {
+        const persistedSymptom = {
           id: created._id,
           name: created.name,
           description: created.description,
@@ -238,15 +257,20 @@ const SymptomInput = () => {
           chip: created.category,
           icon: 'local_hospital',
         };
-        setAllSymptoms((prev) => [uiSymptom, ...prev]);
-        setSelectedIds((prev) => [uiSymptom.id, ...prev]);
+
+        setAllSymptoms((prev) =>
+          prev.map((s) => (s.id === tempId ? persistedSymptom : s))
+        );
+        setSelectedIds((prev) =>
+          prev.map((id) => (id === tempId ? persistedSymptom.id : id))
+        );
       }
-      setQuery('');
     } catch (err) {
+      // Keep local symptom in list even if persistence fails.
       const msg =
         err.response?.data?.message ||
         err.message ||
-        'Failed to create symptom. Please try again.';
+        'Symptom added locally, but failed to save on server.';
       setSaveError(msg);
     } finally {
       setSaving(false);
@@ -305,7 +329,7 @@ const SymptomInput = () => {
   }, [selectedIds.length, allSymptoms.length]);
 
   const handleAnalyze = async () => {
-    if (!token) {
+    if (!user) {
       setSubmitted(true);
       return;
     }
