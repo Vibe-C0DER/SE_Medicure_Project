@@ -6,6 +6,7 @@ import Login from './pages/Login';
 import Register from './pages/Register';
 import Profile from './pages/Profile';
 import SymptomInput from './pages/SymptomInput';
+import PredictionResult from './pages/PredictionResult';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import { getMe } from './api/user';
@@ -55,6 +56,7 @@ function App() {
             </ProtectedRoute>
           }
         />
+        <Route path="/prediction-result" element={<PredictionResult />} />
       </Routes>
     </BrowserRouter>
   );
