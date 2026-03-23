@@ -71,6 +71,7 @@ export const analyzeSymptoms = async (req, res, next) => {
       ranked.push({
         diseaseId: disease?._id,
         name: disease.name,
+      specialist: disease.specialist,
         description: disease.description,
         severity: disease.severity,
         matchPercentage,
@@ -116,18 +117,24 @@ export const analyzeSymptoms = async (req, res, next) => {
     const responsePredictions = top5.map((p) => ({
       diseaseName: toDisplayName(p.name),
       matchPercentage: p.matchPercentage,
+      specialist: p.specialist,
       matchedSymptoms: p.matchedSymptoms,
       totalSymptoms: p.totalSymptoms,
       severity: p.severity,
       description: p.description,
     }));
 
+    const topDisease = {
+      name: toDisplayName(top5[0].name),
+      specialist: top5[0].specialist,
+    };
+
     return res.status(200).json({
       success: true,
       message: 'Disease prediction completed',
       data: {
         predictions: responsePredictions,
-        topDisease: toDisplayName(top5[0].name),
+        topDisease,
       },
     });
   } catch (err) {

@@ -76,9 +76,10 @@ const getSeverityUI = (severity) => {
 };
 
 const RecommendedSidebar = ({ topDisease, topMatchPercentage }) => {
+  const topDiseaseName = topDisease?.name || '';
   // Keep sidebar close to html prototype for now (hardcoded to match the UX demo content).
   const list =
-    topDisease === 'Migraine'
+    topDiseaseName === 'Migraine'
       ? [
           {
             icon: 'neurology',
@@ -138,13 +139,13 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage }) => {
               <h3 className="text-lg font-bold text-secondary">Recommended Specialists</h3>
             </div>
             <p className="text-xs text-pink-500 font-medium ml-1">
-              Based on "{topDisease || 'your selection'}"{typeof topMatchPercentage === 'number' ? ` (${topMatchPercentage}% match)` : ' (match)'}
+              Based on "{topDiseaseName || 'your selection'}"{typeof topMatchPercentage === 'number' ? ` (${topMatchPercentage}% match)` : ' (match)'}
             </p>
           </div>
         </div>
 
         <div className="divide-y divide-pink-50">
-          {list.map((s) => (
+          {list.map((s, idx) => (
             <div key={s.title} className="p-5 hover:bg-pink-50/50 transition-colors cursor-pointer group relative">
               <div className="flex items-start gap-4">
                 <div className="size-12 rounded-full bg-pink-100 border border-pink-200 flex items-center justify-center text-[#db2777] shrink-0 shadow-sm group-hover:scale-110 transition-transform">
@@ -152,9 +153,16 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage }) => {
                 </div>
                 <div className="flex-1">
                   <div className="flex justify-between items-start">
-                    <h4 className="font-bold text-gray-900 text-sm group-hover:text-[#db2777] transition-colors">
-                      {s.title}
-                    </h4>
+                    <div className="flex flex-col">
+                      <h4 className="font-bold text-gray-900 text-sm group-hover:text-[#db2777] transition-colors">
+                        {s.title}
+                      </h4>
+                      {idx === 0 && topDisease?.specialist ? (
+                        <p className="text-[10px] font-bold text-gray-500 mt-1">
+                          Specialist: {topDisease.specialist}
+                        </p>
+                      ) : null}
+                    </div>
                     {s.badge ? (
                       <span className="text-[10px] font-bold bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200">
                         {s.badge}
@@ -214,9 +222,10 @@ const PredictionResult = () => {
     return [...list].sort((a, b) => b.matchPercentage - a.matchPercentage);
   }, [predictionData]);
 
-  const topDisease = predictionData?.topDisease || '';
+  const topDisease = predictionData?.topDisease || null;
+  const topDiseaseName = topDisease?.name || '';
   const resultCount = Math.min(3, predictions.length);
-  const topMatchPercentage = predictions.find((p) => p.diseaseName === topDisease)?.matchPercentage;
+  const topMatchPercentage = predictions.find((p) => p.diseaseName === topDiseaseName)?.matchPercentage;
 
   if (!predictionData) {
     return (
@@ -224,6 +233,27 @@ const PredictionResult = () => {
         <div className="w-full max-w-xl p-6 bg-white dark:bg-gray-900 border border-pink-100/80 dark:border-gray-800 rounded-2xl shadow-sm">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
             No prediction found
+          </h2>
+          <p className="text-slate-600 dark:text-gray-300 mb-6">
+            Please go back and run prediction again.
+          </p>
+          <Link
+            to="/symptoms"
+            className="inline-flex items-center justify-center w-full bg-[#db2777] text-white font-bold py-3 px-5 rounded-2xl hover:bg-[#be123c] transition-colors"
+          >
+            Back to Symptom Checker
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!topDisease?.name) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark">
+        <div className="w-full max-w-xl p-6 bg-white dark:bg-gray-900 border border-pink-100/80 dark:border-gray-800 rounded-2xl shadow-sm">
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
+            No prediction available
           </h2>
           <p className="text-slate-600 dark:text-gray-300 mb-6">
             Please go back and run prediction again.
@@ -373,9 +403,16 @@ const PredictionResult = () => {
                         <div className="flex flex-1 flex-col justify-between p-6 bg-gradient-to-br from-white via-white to-pink-50/30">
                           <div>
                             <div className="flex justify-between items-start mb-3">
-                              <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#db2777] transition-colors">
-                                {p.diseaseName}
-                              </h3>
+                              <div className="flex flex-col gap-1">
+                                <h3 className="text-xl font-bold text-gray-900 group-hover:text-[#db2777] transition-colors">
+                                  {p.diseaseName}
+                                </h3>
+                                {p.specialist ? (
+                                  <p className="text-xs font-medium text-gray-500">
+                                    Specialist: {p.specialist}
+                                  </p>
+                                ) : null}
+                              </div>
                               <span
                                 className={`${resolvedSeverityPillClass} text-xs font-bold px-3 py-1 rounded-full border border-pink-200 uppercase tracking-wide`}
                               >
