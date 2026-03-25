@@ -1,8 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { useSelector } from 'react-redux';
+import { Link, useNavigate } from 'react-router-dom';
 import { fetchSymptoms } from '../api/symptoms.js';
-import { updateMe } from '../api/user.js';
+import { predictDiseases } from '../api/prediction.js';
 
 
 const FALLBACK_SYMPTOMS = [
@@ -56,8 +55,6 @@ const FALLBACK_SYMPTOMS = [
   },
 ];
 
-const STORAGE_KEY = 'symptom_state_v1';
-
 const CHIPS = [
   'All Symptoms',
   'Head & Neck',
@@ -101,52 +98,17 @@ const SymptomCard = ({ symptom, checked, onToggle }) => {
 };
 
 const SymptomInput = () => {
-  const { user } = useSelector((s) => s.auth);
+  const navigate = useNavigate();
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('All Symptoms');
-  const [allSymptoms, setAllSymptoms] = useState(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed.allSymptoms) && parsed.allSymptoms.length) {
-          return parsed.allSymptoms;
-        }
-      }
-    } catch {
-      // ignore storage errors and fall back
-    }
-    return FALLBACK_SYMPTOMS;
-  });
-  const [selectedIds, setSelectedIds] = useState(() => {
-    try {
-      const raw = window.localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed.selectedIds) && parsed.selectedIds.length) {
-          return parsed.selectedIds;
-        }
-      }
-    } catch {
-      // ignore storage errors and fall back
-    }
-    return ['dry-cough', 'high-fever']; // match reference UI (2 selected)
-  });
-  const [submitted, setSubmitted] = useState(false);
+  const [allSymptoms, setAllSymptoms] = useState(() => FALLBACK_SYMPTOMS);
+  const [selectedIds, setSelectedIds] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
+  const [analyzing, setAnalyzing] = useState(false);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
-
-  const normalizedQuery = useMemo(() => query.trim(), [query]);
-
-  const findByName = (name) => {
-    const n = String(name || '').trim().toLowerCase();
-    if (!n) return null;
-    return allSymptoms.find((s) => s.name.toLowerCase() === n) || null;
-  };
 
   useEffect(() => {
     const load = async () => {
@@ -186,96 +148,10 @@ const SymptomInput = () => {
       }
     };
 
-    // Only fetch if we have a logged-in user; otherwise rely on public/fallback list
+    // Load symptoms from the server; fall back list is always available.
       load();
     
   }, []);
-
-  useEffect(() => {
-    try {
-      const payload = {
-        allSymptoms,
-        selectedIds,
-      };
-      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
-    } catch {
-      // ignore storage errors
-    }
-  }, [allSymptoms, selectedIds]);
-
-  const addCustomSymptom = async (name) => {
-    const trimmed = String(name || '').trim();
-    if (!trimmed) return;
-
-    const existing = findByName(trimmed);
-    if (existing) {
-      toggleSymptom(existing.id);
-      setQuery('');
-      return;
-    }
-
-    const slug = trimmed
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-      .slice(0, 40);
-
-    // Always add to selected list immediately for better UX.
-    // If logged in, we then try to persist and replace temp id with DB id.
-    const tempId = `custom-${slug || 'symptom'}-${Date.now()}`;
-    const localCreated = {
-      id: tempId,
-      name: trimmed,
-      description: 'Custom symptom',
-      group: 'Custom',
-      chip: 'Custom',
-      icon: 'local_hospital',
-    };
-
-    setAllSymptoms((prev) => [localCreated, ...prev]);
-    setSelectedIds((prev) => [tempId, ...prev]);
-    setQuery('');
-
-    if (!user) return;
-
-    try {
-      setSaving(true);
-      setSaveError('');
-      const res = await createSymptom({
-        name: trimmed,
-        description: 'Custom symptom',
-        category: 'Custom',
-      });
-
-      const created = res?.data?.data || res?.data;
-      if (created && created._id) {
-        const persistedSymptom = {
-          id: created._id,
-          name: created.name,
-          description: created.description,
-          group: created.category,
-          chip: created.category,
-          icon: 'local_hospital',
-        };
-
-        setAllSymptoms((prev) =>
-          prev.map((s) => (s.id === tempId ? persistedSymptom : s))
-        );
-        setSelectedIds((prev) =>
-          prev.map((id) => (id === tempId ? persistedSymptom.id : id))
-        );
-      }
-    } catch (err) {
-      // Keep local symptom in list even if persistence fails.
-      const msg =
-        err.response?.data?.message ||
-        err.message ||
-        'Symptom added locally, but failed to save on server.';
-      setSaveError(msg);
-    } finally {
-      setSaving(false);
-    }
-  };
 
   const filteredSymptoms = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -311,7 +187,6 @@ const SymptomInput = () => {
   }, [selectedIds, allSymptoms]);
 
   const toggleSymptom = (id) => {
-    setSubmitted(false);
     setSelectedIds((prev) => {
       if (prev.includes(id)) return prev.filter((x) => x !== id);
       return [id, ...prev];
@@ -319,7 +194,6 @@ const SymptomInput = () => {
   };
 
   const removeSelected = (id) => {
-    setSubmitted(false);
     setSelectedIds((prev) => prev.filter((x) => x !== id));
   };
 
@@ -329,25 +203,34 @@ const SymptomInput = () => {
   }, [selectedIds.length, allSymptoms.length]);
 
   const handleAnalyze = async () => {
-    if (!user) {
-      setSubmitted(true);
+    console.log('selectedIds', selectedIds);
+    if (selectedIds.length === 0) {
+      setSaveError('Please select at least one symptom');
       return;
     }
 
     try {
-      setSaving(true);
       setSaveError('');
-      await updateMe({ currentSymptoms: selectedIds });
-      setSubmitted(true);
+      setAnalyzing(true);
+      // The backend expects symptom MongoDB IDs.
+      const predictionResponse = await predictDiseases(selectedIds);
+      console.log('predictionResponse', predictionResponse);
+      const predictionPayload = predictionResponse?.data || {};
+
+      navigate('/prediction-result', {
+        state: { predictionData: predictionPayload },
+      });
+
+      // No need to set local "submitted" state since we redirect.
     } catch (err) {
-      const msg =
-        err.response?.data?.message ||
-        err.message ||
-        'Failed to save symptoms. Please try again.';
-      setSaveError(msg);
-      setSubmitted(false);
+      const isNetworkError = !err?.status;
+      if (isNetworkError) {
+        setSaveError('Unable to connect to server');
+      } else {
+        setSaveError('Prediction failed. Please try again.');
+      }
     } finally {
-      setSaving(false);
+      setAnalyzing(false);
     }
   };
 
@@ -426,6 +309,10 @@ const SymptomInput = () => {
             </p>
           )}
 
+          {!loading && error && (
+            <p className="text-sm text-red-600 dark:text-red-400 mt-1">{error}</p>
+          )}
+
           {/* <div className="relative group">
             <div className="absolute inset-y-0 left-0 pl-5 flex items-center pointer-events-none">
               <span className="material-symbols-outlined text-slate-400 group-focus-within:text-primary transition-colors text-2xl">
@@ -479,12 +366,6 @@ const SymptomInput = () => {
       type="text"
       value={query}
       onChange={(e) => setQuery(e.target.value)}
-      onKeyDown={(e) => {
-        if (e.key === 'Enter') {
-          e.preventDefault();
-          if (normalizedQuery) addCustomSymptom(normalizedQuery);
-        }
-      }}
       placeholder="Search symptoms (e.g., headache, fever, fatigue)..."
       className="
         flex-1
@@ -508,29 +389,6 @@ const SymptomInput = () => {
 
   </div>
 </div>
-
-          {normalizedQuery && filteredSymptoms.length === 0 && (
-            <div className="flex items-center justify-between bg-white dark:bg-gray-800 border border-pink-100/80 dark:border-gray-700 rounded-2xl px-5 py-4 shadow-sm">
-              <div className="flex items-center gap-3">
-                <span className="material-symbols-outlined text-primary text-2xl">add_circle</span>
-                <div>
-                  <p className="text-sm font-bold text-gray-900 dark:text-white">
-                    Add “{normalizedQuery}”
-                  </p>
-                  <p className="text-xs text-slate-500 dark:text-gray-300">
-                    Create a custom symptom and add it to your list.
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                onClick={() => addCustomSymptom(normalizedQuery)}
-                className="bg-primary text-white px-5 py-2.5 rounded-full text-sm font-semibold shadow-lg shadow-primary/25 transition-transform active:scale-95 hover:bg-primary-dark"
-              >
-                Add
-              </button>
-            </div>
-          )}
 
           <div className="flex flex-wrap gap-3 pb-2 border-b border-pink-100/70">
             {CHIPS.map((chip) => {
@@ -651,24 +509,18 @@ const SymptomInput = () => {
                 <button
                   type="button"
                   onClick={handleAnalyze}
-                  disabled={selectedIds.length === 0 || saving}
+                  disabled={selectedIds.length === 0 || analyzing}
                   className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-3 group transform active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-2xl">medical_services</span>
                   <span className="text-lg">
-                    {saving ? 'Saving...' : 'Analyze Symptoms'}
+                    {analyzing ? 'Analyzing...' : 'Analyze Symptoms'}
                   </span>
                 </button>
 
                 {saveError && (
                   <div className="rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-700">
                     {saveError}
-                  </div>
-                )}
-
-                {submitted && (
-                  <div className="rounded-xl border border-pink-100 bg-pink-50/40 p-4 text-sm text-slate-700">
-                    Symptoms submitted and saved to your profile.
                   </div>
                 )}
 
