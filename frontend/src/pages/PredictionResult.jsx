@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 
 const DISEASE_THEMES = {
   'Migraine': {
@@ -75,7 +75,7 @@ const getSeverityUI = (severity) => {
   return { label: '', pillClass: '' };
 };
 
-const RecommendedSidebar = ({ topDisease, topMatchPercentage }) => {
+const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLocating }) => {
   const topDiseaseName = topDisease?.name || '';
   // Keep sidebar close to html prototype for now (hardcoded to match the UX demo content).
   const list =
@@ -170,15 +170,22 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage }) => {
                     ) : null}
                   </div>
                   <p className="text-xs text-gray-500 leading-snug mt-1.5 mb-2">{s.description}</p>
-                  <div className="flex gap-2">
-                  <button className="text-xs font-semibold text-[#db2777] bg-[#db2777]/5 px-2 py-1 rounded hover:bg-[#db2777]/10 transition-colors flex items-center gap-1">
-                      Find nearby{' '}
-                      <span className="material-symbols-outlined text-[12px]">near_me</span>
-                    </button>
+                    <div className="flex flex-col gap-2 w-full mt-3">
+                    <button 
+                        onClick={(e) => { e.preventDefault(); onFindNearby?.(); }}
+                        disabled={isLocating}
+                        className="w-max text-xs font-semibold text-[#db2777] bg-[#db2777]/5 px-3 py-1.5 rounded-lg hover:bg-[#db2777]/10 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
+                        {isLocating ? 'Finding your location...' : (
+                          <>
+                            Find Specialist Near Me{' '}
+                            <span className="material-symbols-outlined text-[14px]">near_me</span>
+                          </>
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
           ))}
         </div>
 
@@ -226,6 +233,41 @@ const PredictionResult = () => {
   const topDiseaseName = topDisease?.name || '';
   const resultCount = Math.min(3, predictions.length);
   const topMatchPercentage = predictions.find((p) => p.diseaseName === topDiseaseName)?.matchPercentage;
+
+  const specialist = predictionData?.topDisease?.specialist;
+  const navigate = useNavigate();
+  const [isLocating, setIsLocating] = useState(false);
+  const [locationError, setLocationError] = useState(null);
+
+  const handleFindNearby = () => {
+    setIsLocating(true);
+    setLocationError(null);
+    if (!navigator.geolocation) {
+      setIsLocating(false);
+      setLocationError('Your browser does not support location services.');
+      return;
+    }
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setIsLocating(false);
+        navigate('/specialists', {
+          state: {
+            latitude: position.coords.latitude,
+            longitude: position.coords.longitude,
+            specialist: specialist
+          }
+        });
+      },
+      (error) => {
+        setIsLocating(false);
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError('Location access denied. Please allow location to find nearby specialists.');
+        } else {
+          setLocationError('Unable to get your location. Please try again.');
+        }
+      }
+    );
+  };
 
   if (!predictionData) {
     return (
@@ -458,7 +500,18 @@ const PredictionResult = () => {
             </main>
 
             <aside className="w-full lg:w-[360px] shrink-0 flex flex-col gap-6">
-              <RecommendedSidebar topDisease={topDisease} topMatchPercentage={topMatchPercentage} />
+              <RecommendedSidebar 
+                topDisease={topDisease} 
+                topMatchPercentage={topMatchPercentage} 
+                onFindNearby={handleFindNearby}
+                isLocating={isLocating}
+              />
+              {locationError && (
+                <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm border border-red-100 flex items-start gap-2 shadow-sm">
+                  <span className="material-symbols-outlined text-[20px] shrink-0">error</span>
+                  <p>{locationError}</p>
+                </div>
+              )}
             </aside>
           </div>
         </div>
