@@ -14,6 +14,8 @@ frontend/.env
 backend/.env
 !.env.example
 
+htmlCode
+
 ################################
 # Logs
 ################################
@@ -31,6 +33,8 @@ build/
 frontend/build/
 frontend/dist/
 backend/dist/
+
+scripts/
 
 ################################
 # Coverage (Testing)
