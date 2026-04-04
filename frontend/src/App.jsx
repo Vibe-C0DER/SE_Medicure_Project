@@ -7,6 +7,7 @@ import Register from './pages/Register';
 import Profile from './pages/Profile';
 import SymptomInput from './pages/SymptomInput';
 import PredictionResult from './pages/PredictionResult';
+import SpecialistMap from './pages/SpecialistMap';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import { getMe } from './api/user';
@@ -57,6 +58,7 @@ function App() {
           }
         />
         <Route path="/prediction-result" element={<PredictionResult />} />
+        <Route path="/specialists" element={<SpecialistMap />} />
       </Routes>
     </BrowserRouter>
   );
