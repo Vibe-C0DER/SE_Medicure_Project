@@ -8,6 +8,8 @@ import Profile from './pages/Profile';
 import SymptomInput from './pages/SymptomInput';
 import PredictionResult from './pages/PredictionResult';
 import SpecialistMap from './pages/SpecialistMap';
+import MyReports from './pages/MyReports';
+import ReportDetails from './pages/ReportDetails';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import { getMe } from './api/user';
@@ -55,6 +57,22 @@ function App() {
             <ProtectedRoute>
               <Profile />
             </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/reports/me"
+          element={
+            
+              <MyReports />
+            
+          }
+        />
+        <Route
+          path="/reports/:id"
+          element={
+            
+              <ReportDetails />
+            
           }
         />
         <Route path="/prediction-result" element={<PredictionResult />} />

@@ -8,6 +8,7 @@ import userRouter from './routes/user.route.js';
 import symptomRouter from './routes/symptom.route.js';
 import diseaseRouter from './routes/disease.route.js';
 import predictionRouter from './routes/prediction.routes.js';
+import { userReportRouter, adminReportRouter } from './routes/report.route.js';
 import connectDB from './db/connectDB.js';
 
 dotenv.config();
@@ -18,7 +19,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5174',
+    origin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
     credentials: true,
   })
 );
@@ -31,6 +32,8 @@ app.use('/api/users', userRouter);
 app.use('/api/symptoms', symptomRouter);
 app.use('/api/diseases', diseaseRouter);
 app.use('/api/predict', predictionRouter);
+app.use('/api/reports', userReportRouter);
+app.use('/api/admin/reports', adminReportRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
