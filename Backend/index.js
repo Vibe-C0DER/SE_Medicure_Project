@@ -8,6 +8,7 @@ import userRouter from './routes/user.route.js';
 import symptomRouter from './routes/symptom.route.js';
 import diseaseRouter from './routes/disease.route.js';
 import predictionRouter from './routes/prediction.routes.js';
+import aiRouter from './routes/ai.routes.js';
 import { userReportRouter, adminReportRouter } from './routes/report.route.js';
 import connectDB from './db/connectDB.js';
 
@@ -32,6 +33,7 @@ app.use('/api/users', userRouter);
 app.use('/api/symptoms', symptomRouter);
 app.use('/api/diseases', diseaseRouter);
 app.use('/api/predict', predictionRouter);
+app.use('/api/ai', aiRouter);
 app.use('/api/reports', userReportRouter);
 app.use('/api/admin/reports', adminReportRouter);
 

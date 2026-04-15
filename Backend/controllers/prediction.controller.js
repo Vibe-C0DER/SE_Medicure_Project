@@ -16,40 +16,10 @@ const toDisplayName = (value) => {
     .join(' ');
 };
 
-export const analyzeSymptoms = async (req, res, next) => {
-  try {
-    const userId = req.user?.id;
-    if (!userId) {
-      return next(errorHandler(401, 'Unauthorized'));
-    }
 
-    const raw = req.body?.symptoms;
-
-   
-    if (!Array.isArray(raw) || raw.length === 0) {
-      return next(errorHandler(400, 'symptoms must be a non-empty array of symptom IDs'));
-    }
-
-    const symptomIds = [...new Set(raw.map((id) => String(id).trim()))].filter(Boolean);
-
-    // console.log('symptomIds', symptomIds);
-    for (const id of symptomIds) {
-      if (!isValidObjectId(id)) {
-        return next(errorHandler(400, `Invalid symptom id: ${id}`));
-      }
-    }
-
-    const found = await Symptom.find({ _id: { $in: symptomIds } }).select('_id');
-
-  
-    if (found.length !== symptomIds.length) {
-      return next(errorHandler(400, 'One or more symptom IDs do not exist'));
-    }
-
+export const rankDiseasesBySymptoms = async (userId, symptomIds) => {
     const userSet = new Set(symptomIds);
     const diseases = await Disease.find({ isActive: true }).lean();
-
-
 
     const ranked = [];
 
@@ -66,12 +36,10 @@ export const analyzeSymptoms = async (req, res, next) => {
 
       const matchPercentage = Math.round((matchedSymptoms / totalSymptoms) * 100);
 
-      console.log('matchPercentage', matchPercentage);
-
       ranked.push({
         diseaseId: disease?._id,
         name: disease.name,
-      specialist: disease.specialist,
+        specialist: disease.specialist,
         description: disease.description,
         severity: disease.severity,
         matchPercentage,
@@ -90,14 +58,10 @@ export const analyzeSymptoms = async (req, res, next) => {
     const top5 = ranked.slice(0, 5);
 
     if (top5.length === 0) {
-      return res.status(200).json({
-        success: true,
-        message: 'Disease prediction completed',
-        data: {
-          predictions: [],
-          topDisease: null,
-        },
-      });
+      return {
+        predictions: [],
+        topDisease: null,
+      };
     }
 
     const predictionsPayload = top5.map((p) => ({
@@ -115,6 +79,7 @@ export const analyzeSymptoms = async (req, res, next) => {
     });
 
     const responsePredictions = top5.map((p) => ({
+      diseaseId: p.diseaseId,
       diseaseName: toDisplayName(p.name),
       matchPercentage: p.matchPercentage,
       specialist: p.specialist,
@@ -129,11 +94,46 @@ export const analyzeSymptoms = async (req, res, next) => {
       specialist: top5[0].specialist,
     };
 
+    return {
+      predictions: responsePredictions,
+      topDisease,
+    };
+};
+
+export const analyzeSymptoms = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return next(errorHandler(401, 'Unauthorized'));
+    }
+
+    const raw = req.body?.symptoms;
+   
+    if (!Array.isArray(raw) || raw.length === 0) {
+      return next(errorHandler(400, 'symptoms must be a non-empty array of symptom IDs'));
+    }
+
+    const symptomIds = [...new Set(raw.map((id) => String(id).trim()))].filter(Boolean);
+
+    for (const id of symptomIds) {
+      if (!isValidObjectId(id)) {
+        return next(errorHandler(400, `Invalid symptom id: ${id}`));
+      }
+    }
+
+    const found = await Symptom.find({ _id: { $in: symptomIds } }).select('_id');
+  
+    if (found.length !== symptomIds.length) {
+      return next(errorHandler(400, 'One or more symptom IDs do not exist'));
+    }
+
+    const { predictions, topDisease } = await rankDiseasesBySymptoms(userId, symptomIds);
+
     return res.status(200).json({
       success: true,
       message: 'Disease prediction completed',
       data: {
-        predictions: responsePredictions,
+        predictions,
         topDisease,
       },
     });
