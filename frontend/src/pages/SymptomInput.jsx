@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { fetchSymptoms } from '../api/symptoms.js';
 import { predictDiseases } from '../api/prediction.js';
-
+import { aiApi } from '../api/ai.js';
 
 const FALLBACK_SYMPTOMS = [
   {
@@ -107,6 +107,10 @@ const SymptomInput = () => {
   const [error, setError] = useState('');
   const [saveError, setSaveError] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
+
+  const [aiText, setAiText] = useState('');
+  const [aiError, setAiError] = useState('');
+  const [aiLoading, setAiLoading] = useState(false);
 
   const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
@@ -234,6 +238,31 @@ const SymptomInput = () => {
     }
   };
 
+  const handleAiAnalyze = async () => {
+    if (!aiText.trim()) {
+      setAiError('Please describe your symptoms first.');
+      return;
+    }
+    try {
+      setAiError('');
+      setAiLoading(true);
+      const res = await aiApi.analyzeText(aiText);
+      const data = res?.data;
+
+      if (data && data.diseases && data.diseases.length > 0) {
+        navigate('/prediction-result', {
+          state: { predictionData: { predictions: data.diseases, topDisease: data.topDisease } },
+        });
+      } else {
+         setAiError('No recognizable symptoms found.');
+      }
+    } catch (err) {
+      setAiError('AI analysis failed. Please try again.');
+    } finally {
+      setAiLoading(false);
+    }
+  };
+
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-700 dark:text-gray-200 font-display antialiased min-h-screen flex flex-col">
       <header className="bg-white dark:bg-gray-900 border-b border-pink-100 dark:border-gray-800 sticky top-0 z-50 backdrop-blur-sm bg-white/90">
@@ -299,8 +328,37 @@ const SymptomInput = () => {
             </h1>
             <p className="text-slate-500 dark:text-gray-300 text-lg max-w-2xl leading-relaxed">
               Select all the symptoms you are experiencing to help our AI engine analyze your
-              condition accurately.
+              condition accurately, or simply describe them below!
             </p>
+          </div>
+
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-pink-100/80 dark:border-gray-700 flex flex-col gap-4">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
+              <span className="material-symbols-outlined text-primary">smart_toy</span>
+              Describe your symptoms
+            </h3>
+            <textarea
+              value={aiText}
+              onChange={(e) => setAiText(e.target.value)}
+              placeholder="Describe your symptoms (e.g. I have had a high fever and headache since last night...)"
+              className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-base rounded-xl p-4 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-h-[120px] resize-y"
+            ></textarea>
+            
+            {aiError && (
+              <p className="text-sm text-red-600 dark:text-red-400 font-medium">{aiError}</p>
+            )}
+
+            <div className="flex justify-end">
+              <button
+                type="button"
+                onClick={handleAiAnalyze}
+                disabled={aiLoading}
+                className="bg-primary hover:bg-primary-dark text-white font-bold py-3 px-6 rounded-xl shadow-md shadow-primary/20 transition-all flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span className="material-symbols-outlined text-xl">auto_awesome</span>
+                {aiLoading ? 'Analyzing...' : 'Analyze with AI'}
+              </button>
+            </div>
           </div>
 
           {loading && (
