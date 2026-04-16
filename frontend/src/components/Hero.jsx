@@ -1,6 +1,102 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
+import { useJsApiLoader } from '@react-google-maps/api';
+import { setSearchResults, setSearchLoading, setSearchError } from '../store/searchSlice';
+import { normalizeCondition } from '../utils/normalization';
+import { getCoordinates, searchSpecialists } from '../api/maps';
 
 const Hero = () => {
+  const [conditionInput, setConditionInput] = useState('');
+  const [locationInput, setLocationInput] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  const { isLoaded } = useJsApiLoader({
+    googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    libraries: ['places'],
+  });
+
+  const handleSearch = async (overrideCondition = null) => {
+    const finalCondition = overrideCondition || conditionInput;
+    
+    // Validation
+    if (!finalCondition.trim()) {
+      setError('Please enter a condition or doctor type');
+      return;
+    }
+    
+    setError('');
+    setLoading(true);
+    dispatch(setSearchLoading(true));
+
+    try {
+      if (!isLoaded) {
+        throw new Error('Maps API is still loading. Please try again in a moment.');
+      }
+
+      // Normalize Query
+      const specialist = normalizeCondition(finalCondition);
+
+      let locationData = { lat: null, lng: null, address: locationInput };
+
+      // Get Location
+      if (!locationInput.trim()) {
+        try {
+          const position = await new Promise((resolve, reject) => {
+            navigator.geolocation.getCurrentPosition(resolve, reject);
+          });
+          locationData = {
+            lat: position.coords.latitude,
+            lng: position.coords.longitude,
+            address: 'Your current location'
+          };
+        } catch (err) {
+          throw new Error('Please enter a location manually');
+        }
+      } else {
+        // Geocode text location
+        locationData = await getCoordinates(locationInput);
+      }
+
+      // Call Google Places API
+      const results = await searchSpecialists(specialist, locationData);
+
+      // Store Results
+      dispatch(setSearchResults({
+        results,
+        query: specialist,
+        location: locationData.address
+      }));
+
+      // Redirect
+      navigate('/specialists', { 
+        state: { 
+          latitude: locationData.lat, 
+          longitude: locationData.lng, 
+          specialist 
+        } 
+      });
+
+    } catch (err) {
+      const errMsg = err.message || 'Something went wrong. Try again.';
+      setError(errMsg);
+      dispatch(setSearchError(errMsg));
+    } finally {
+      setLoading(false);
+      dispatch(setSearchLoading(false));
+    }
+  };
+
+  const handleChipClick = (e, condition) => {
+    e.preventDefault();
+    setConditionInput(condition);
+    handleSearch(condition);
+  };
+
   return (
     <section className="relative flex min-h-[750px] flex-col items-center justify-center overflow-hidden bg-mesh px-4 pt-10 pb-20 lg:px-20">
       <div className="absolute top-20 left-20 h-72 w-72 rounded-full bg-pink-300/20 blur-[80px]"></div>
@@ -24,44 +120,75 @@ const Hero = () => {
           Experience a new standard of medical care. Connect with top specialists, understand your symptoms, and take charge of your wellbeing with MediCure.
         </p>
         
-        <div className="mt-8 flex w-full max-w-4xl flex-col gap-3 rounded-[2rem] bg-white p-3 shadow-[0_20px_60px_-15px_rgba(236,72,153,0.15)] ring-1 ring-pink-100/50 md:flex-row md:items-center transform transition-all hover:scale-[1.01]">
-          <div className="flex flex-1 items-center gap-3 rounded-[1.5rem] bg-gray-50/50 px-6 py-4 md:bg-transparent transition-colors hover:bg-gray-50/80">
-            <span className="material-symbols-outlined text-pink-400 text-2xl">search</span>
-            <div className="flex flex-col w-full">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Condition or Doctor</label>
-              <input 
-                className="w-full border-none bg-transparent p-0 text-base font-semibold text-gray-900 placeholder-gray-300 focus:ring-0 focus:outline-none" 
-                placeholder="e.g. Cardiologist, Fever..." 
-                type="text"
-              />
+        <div className="w-full max-w-4xl">
+          <div className="mt-8 flex w-full flex-col gap-3 rounded-[2rem] bg-white p-3 shadow-[0_20px_60px_-15px_rgba(236,72,153,0.15)] ring-1 ring-pink-100/50 md:flex-row md:items-center transform transition-all hover:scale-[1.01]">
+            <div className="flex flex-1 items-center gap-3 rounded-[1.5rem] bg-gray-50/50 px-6 py-4 md:bg-transparent transition-colors hover:bg-gray-50/80">
+              <span className="material-symbols-outlined text-pink-400 text-2xl">search</span>
+              <div className="flex flex-col w-full text-left">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Condition or Doctor</label>
+                <input 
+                  className="w-full border-none bg-transparent p-0 text-base font-semibold text-gray-900 placeholder-gray-300 focus:ring-0 focus:outline-none" 
+                  placeholder="e.g. Cardiologist, Fever..." 
+                  type="text"
+                  value={conditionInput}
+                  onChange={(e) => {
+                    setConditionInput(e.target.value);
+                    if (error) setError('');
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
             </div>
-          </div>
-          
-          <div className="hidden h-10 w-px bg-gray-100 md:block"></div>
-          
-          <div className="flex flex-1 items-center gap-3 rounded-[1.5rem] bg-gray-50/50 px-6 py-4 md:bg-transparent transition-colors hover:bg-gray-50/80">
-            <span className="material-symbols-outlined text-pink-400 text-2xl">location_on</span>
-            <div className="flex flex-col w-full">
-              <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Location</label>
-              <input 
-                className="w-full border-none bg-transparent p-0 text-base font-semibold text-gray-900 placeholder-gray-300 focus:ring-0 focus:outline-none" 
-                placeholder="e.g. Ahmedabad, India" 
-                type="text"
-              />
+            
+            <div className="hidden h-10 w-px bg-gray-100 md:block"></div>
+            
+            <div className="flex flex-1 items-center gap-3 rounded-[1.5rem] bg-gray-50/50 px-6 py-4 md:bg-transparent transition-colors hover:bg-gray-50/80">
+              <span className="material-symbols-outlined text-pink-400 text-2xl">location_on</span>
+              <div className="flex flex-col w-full text-left">
+                <label className="text-[10px] font-bold uppercase tracking-wider text-gray-400">Location</label>
+                <input 
+                  className="w-full border-none bg-transparent p-0 text-base font-semibold text-gray-900 placeholder-gray-300 focus:ring-0 focus:outline-none" 
+                  placeholder="e.g. Ahmedabad, India" 
+                  type="text"
+                  value={locationInput}
+                  onChange={(e) => {
+                    setLocationInput(e.target.value);
+                    if (error) setError('');
+                  }}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                />
+              </div>
             </div>
+            
+            <button 
+              onClick={() => handleSearch()}
+              disabled={loading}
+              className="h-16 w-full md:w-auto md:min-w-[140px] rounded-[1.5rem] bg-primary px-8 text-lg font-bold text-white transition-all hover:bg-primary-hover hover:shadow-lg hover:shadow-pink-200 active:scale-95 disabled:opacity-70 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            >
+              {loading ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-2xl">progress_activity</span>
+                  <span>Searching...</span>
+                </>
+              ) : (
+                'Search'
+              )}
+            </button>
           </div>
-          
-          <button className="h-16 w-full md:w-auto md:min-w-[140px] rounded-[1.5rem] bg-primary px-8 text-lg font-bold text-white transition-all hover:bg-primary-hover hover:shadow-lg hover:shadow-pink-200 active:scale-95">
-            Search
-          </button>
+          {error && <p className="mt-4 text-rose-500 font-bold text-sm text-center animate-fade-in">{error}</p>}
         </div>
         
         <div className="mt-8 flex flex-wrap justify-center gap-3 text-sm text-gray-500">
           <span className="font-medium text-gray-400">Popular:</span>
-          <a className="rounded-full bg-white px-3 py-1 border border-pink-50 hover:border-pink-200 hover:text-primary transition-colors" href="#">Dermatologist</a>
-          <a className="rounded-full bg-white px-3 py-1 border border-pink-50 hover:border-pink-200 hover:text-primary transition-colors" href="#">Pediatrician</a>
-          <a className="rounded-full bg-white px-3 py-1 border border-pink-50 hover:border-pink-200 hover:text-primary transition-colors" href="#">Mental Health</a>
-          <a className="rounded-full bg-white px-3 py-1 border border-pink-50 hover:border-pink-200 hover:text-primary transition-colors" href="#">Covid-19</a>
+          {['Dermatologist', 'Pediatrician', 'Mental Health', 'Covid-19'].map((chip) => (
+            <button 
+              key={chip}
+              onClick={(e) => handleChipClick(e, chip)}
+              className={`rounded-full bg-white px-3 py-1 border transition-colors ${conditionInput === chip ? 'border-primary text-primary shadow-sm' : 'border-pink-50 hover:border-pink-200 hover:text-primary'}`}
+            >
+              {chip}
+            </button>
+          ))}
         </div>
       </div>
     </section>

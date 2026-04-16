@@ -1,9 +1,11 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Navbar from '../components/Navbar';
 
 const libraries = ['places'];
+// ... (omitting intermediate lines for brevity if possible, but I'll provide the full block)
 const mapContainerStyle = {
   width: '100%',
   height: '100%'
@@ -26,7 +28,9 @@ const mapOptions = {
 
 const SpecialistMap = () => {
   const routerLocation = useLocation();
-  const { latitude, longitude, specialist } = routerLocation.state || {};
+  const { latitude, longitude, specialist: routerSpecialist } = routerLocation.state || {};
+  
+  const { results: reduxResults, query: reduxSpecialist } = useSelector((state) => state.search);
 
   const { isLoaded, loadError } = useJsApiLoader({
     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
@@ -39,6 +43,7 @@ const SpecialistMap = () => {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [phoneNumbers, setPhoneNumbers] = useState({});
 
+  const specialist = reduxSpecialist || routerSpecialist;
   const center = { lat: latitude || 0, lng: longitude || 0 };
 
   const onLoad = useCallback((mapInstance) => {
@@ -50,36 +55,51 @@ const SpecialistMap = () => {
   }, []);
 
   useEffect(() => {
-    if (isLoaded && map && specialist && latitude && longitude) {
+    if (isLoaded && map) {
       const service = new window.google.maps.places.PlacesService(map);
-      const request = {
-        location: center,
-        radius: '5000',
-        query: `${specialist} near me`,
-      };
-      service.textSearch(request, (results, status) => {
-        if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
-          setPlaces(results);
-          let delay = 0;
-          results.forEach((place) => {
-            setTimeout(() => {
-              service.getDetails(
-                { placeId: place.place_id, fields: ['formatted_phone_number'] },
-                (detailResult, detailStatus) => {
-                  if (detailStatus === window.google.maps.places.PlacesServiceStatus.OK && detailResult?.formatted_phone_number) {
-                    setPhoneNumbers((prev) => ({ ...prev, [place.place_id]: detailResult.formatted_phone_number }));
-                  } else {
-                    setPhoneNumbers((prev) => ({ ...prev, [place.place_id]: 'Phone unavailable' }));
-                  }
+      
+      const fetchDetails = (results) => {
+        let delay = 0;
+        results.forEach((place) => {
+          setTimeout(() => {
+            service.getDetails(
+              { placeId: place.place_id, fields: ['formatted_phone_number'] },
+              (detailResult, detailStatus) => {
+                if (detailStatus === window.google.maps.places.PlacesServiceStatus.OK && detailResult?.formatted_phone_number) {
+                  setPhoneNumbers((prev) => ({ ...prev, [place.place_id]: detailResult.formatted_phone_number }));
+                } else {
+                  setPhoneNumbers((prev) => ({ ...prev, [place.place_id]: 'Phone unavailable' }));
                 }
-              );
-            }, delay);
-            delay += 250;
-          });
-        }
-      });
+              }
+            );
+          }, delay);
+          delay += 250;
+        });
+      };
+
+      if (reduxResults && reduxResults.length > 0) {
+        // Use results from Redux
+        setPlaces(reduxResults.map(r => ({
+          ...r,
+          geometry: { location: { lat: r.lat, lng: r.lng } } // Format for the map markers
+        })));
+        fetchDetails(reduxResults);
+      } else if (specialist && latitude && longitude) {
+        // Fallback to existing search logic
+        const request = {
+          location: center,
+          radius: '5000',
+          query: `${specialist} near me`,
+        };
+        service.textSearch(request, (results, status) => {
+          if (status === window.google.maps.places.PlacesServiceStatus.OK && results) {
+            setPlaces(results);
+            fetchDetails(results);
+          }
+        });
+      }
     }
-  }, [isLoaded, map, specialist, latitude, longitude]);
+  }, [isLoaded, map, specialist, latitude, longitude, reduxResults]);
 
   if (!latitude || !longitude) {
     return (
@@ -128,7 +148,9 @@ const SpecialistMap = () => {
           
           <div className="flex-1 overflow-y-auto custom-scrollbar p-4 space-y-4 bg-background-light">
             {places.length === 0 && isLoaded && (
-                <p className="text-sm text-slate-500 text-center py-4">Searching for specialists...</p>
+                <p className="text-sm text-slate-500 text-center py-8">
+                  {specialist ? `No ${specialist}s found near your location.` : "Searching for specialists..."}
+                </p>
             )}
             {places.map((place) => (
               <div 
