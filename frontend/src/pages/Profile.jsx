@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '../components/Navbar';
 import { getMe, updateMe } from '../api/user';
 import { setCredentials } from '../store/authSlice';
+import { validateProfile } from '../utils/validation/profile.validation';
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -136,33 +137,10 @@ const Profile = () => {
       setError('');
       setSuccess('');
 
-      // Client-side validation for inline errors (mirrors backend rules)
-      const nextFieldErrors = {};
-      const full = String(formData.fullname || '').trim();
-      if (!full) nextFieldErrors.fullname = 'Full name is required';
-      if (full.length > 101) nextFieldErrors.fullname = 'Full name is too long';
-
-      const ageNum = Number(formData.age);
-      if (!Number.isFinite(ageNum) || !Number.isInteger(ageNum)) {
-        nextFieldErrors.age = 'Age must be an integer';
-      } else if (ageNum < 0 || ageNum > 120) {
-        nextFieldErrors.age = 'Age must be between 0 and 120';
-      }
-
-      const allowedGender = ['male', 'female', 'other'];
-      if (!allowedGender.includes(formData.gender)) {
-        nextFieldErrors.gender = `Gender must be one of: ${allowedGender.join(', ')}`;
-      }
-
-      const loc = String(formData.location || '').trim();
-      if (!loc) nextFieldErrors.location = 'Location is required';
-      if (loc.length > 100) nextFieldErrors.location = 'Location must be at most 100 characters';
-
-      const bio = String(formData.bio ?? '');
-      if (bio.length > 500) nextFieldErrors.bio = 'Bio must be at most 500 characters';
-
-      if (Object.keys(nextFieldErrors).length > 0) {
-        setFieldErrors(nextFieldErrors);
+      // Client-side validation for inline errors using Zod
+      const validation = validateProfile(formData);
+      if (!validation.success) {
+        setFieldErrors(validation.errors);
         return;
       }
 

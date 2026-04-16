@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
 import { signin } from '../api/auth';
 import { setCredentials } from '../store/authSlice';
+import { validateLogin } from '../utils/validation/auth.validation';
 
 const Login = () => {
   const navigate = useNavigate();
@@ -13,10 +14,28 @@ const Login = () => {
   const [keepLoggedIn, setKeepLoggedIn] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
+
+  const handleEmailChange = (e) => {
+    setEmail(e.target.value);
+    setFieldErrors(prev => ({ ...prev, email: undefined }));
+  };
+
+  const handlePasswordChange = (e) => {
+    setPassword(e.target.value);
+    setFieldErrors(prev => ({ ...prev, password: undefined }));
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    const validation = validateLogin({ email, password });
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+
     setLoading(true);
     try {
       const res = await signin({ email, password });
@@ -83,10 +102,10 @@ const Login = () => {
                 placeholder="hello@medicure.com"
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
+                onChange={handleEmailChange}
               />
             </div>
+            {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
           </div>
           <div>
             <div className="flex items-center justify-between mb-1.5">
@@ -103,10 +122,10 @@ const Login = () => {
                 placeholder="••••••••"
                 type="password"
                 value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
+                onChange={handlePasswordChange}
               />
             </div>
+            {fieldErrors.password && <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>}
           </div>
           <div className="flex items-center">
             <label className="flex items-center cursor-pointer custom-checkbox relative select-none">
