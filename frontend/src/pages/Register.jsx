@@ -4,6 +4,7 @@ import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
 import { signin, signup } from '../api/auth';
 import { setCredentials } from '../store/authSlice';
+import { validateRegister } from '../utils/validation/auth.validation';
 
 const Register = () => {
   const navigate = useNavigate();
@@ -13,20 +14,40 @@ const Register = () => {
     lastName: '',
     email: '',
     password: '',
-agreeTerms: false,
+    confirmPassword: '',
+    agreeTerms: false,
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [fieldErrors, setFieldErrors] = useState({});
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
     setForm((prev) => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
+    setFieldErrors((prev) => {
+      const err = { ...prev };
+      delete err[name];
+      return err;
+    });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.agreeTerms) return;
+    
     setError('');
+    
+    const validation = validateRegister(form);
+    if (!validation.success) {
+      setFieldErrors(validation.errors);
+      return;
+    }
+    
+    if (form.password !== form.confirmPassword) {
+      setFieldErrors((prev) => ({ ...prev, confirmPassword: "Passwords must match" }));
+      return;
+    }
+
     setLoading(true);
     try {
       await signup({
@@ -123,8 +144,8 @@ agreeTerms: false,
               type="email"
               value={form.email}
               onChange={handleChange}
-              required
             />
+            {fieldErrors.email && <p className="text-red-500 text-xs mt-1">{fieldErrors.email}</p>}
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="reg-password">Password</label>
@@ -136,13 +157,25 @@ agreeTerms: false,
               type="password"
               value={form.password}
               onChange={handleChange}
-              required
-              minLength={8}
             />
+            {fieldErrors.password && <p className="text-red-500 text-xs mt-1">{fieldErrors.password}</p>}
             <p className="mt-1.5 text-xs text-gray-500 flex items-center gap-1">
               <span className="material-symbols-outlined text-[14px]">info</span>
               Must be at least 8 characters
             </p>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1.5" htmlFor="reg-confirmPassword">Confirm Password</label>
+            <input
+              className={`block w-full px-4 py-3 border ${fieldErrors.confirmPassword ? 'border-red-500' : 'border-gray-200'} rounded-xl bg-gray-50 text-gray-900 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-medicure-pink/20 focus:border-medicure-pink focus:bg-white transition-all duration-200`}
+              id="reg-confirmPassword"
+              name="confirmPassword"
+              placeholder="Confirm your password"
+              type="password"
+              value={form.confirmPassword}
+              onChange={handleChange}
+            />
+            {fieldErrors.confirmPassword && <p className="text-red-500 text-xs mt-1">{fieldErrors.confirmPassword}</p>}
           </div>
           <div className="pt-2">
             <label className="flex items-start cursor-pointer custom-checkbox relative select-none">

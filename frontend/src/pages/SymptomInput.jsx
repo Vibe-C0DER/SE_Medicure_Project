@@ -3,6 +3,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { fetchSymptoms } from '../api/symptoms.js';
 import { predictDiseases } from '../api/prediction.js';
 import { aiApi } from '../api/ai.js';
+import { validateSymptomSelection, validateSymptomSearch } from '../utils/validation/symptom.validation.js';
+import { validateAiInput } from '../utils/validation/ai.validation.js';
 
 const FALLBACK_SYMPTOMS = [
   {
@@ -158,7 +160,8 @@ const SymptomInput = () => {
   }, []);
 
   const filteredSymptoms = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    const valSearch = validateSymptomSearch(query);
+    const q = valSearch.success ? valSearch.data.toLowerCase() : '';
     return allSymptoms.filter((s) => {
       const matchesQuery =
         !q ||
@@ -208,8 +211,9 @@ const SymptomInput = () => {
 
   const handleAnalyze = async () => {
     console.log('selectedIds', selectedIds);
-    if (selectedIds.length === 0) {
-      setSaveError('Please select at least one symptom');
+    const validation = validateSymptomSelection(selectedIds);
+    if (!validation.success) {
+      setSaveError(validation.errors.selectedIds);
       return;
     }
 
@@ -239,8 +243,9 @@ const SymptomInput = () => {
   };
 
   const handleAiAnalyze = async () => {
-    if (!aiText.trim()) {
-      setAiError('Please describe your symptoms first.');
+    const validation = validateAiInput(aiText);
+    if (!validation.success) {
+      setAiError(validation.errors.text);
       return;
     }
     try {
@@ -339,9 +344,12 @@ const SymptomInput = () => {
             </h3>
             <textarea
               value={aiText}
-              onChange={(e) => setAiText(e.target.value)}
+              onChange={(e) => {
+                  setAiText(e.target.value);
+                  setAiError('');
+              }}
               placeholder="Describe your symptoms (e.g. I have had a high fever and headache since last night...)"
-              className="w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-base rounded-xl p-4 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-h-[120px] resize-y"
+              className={`w-full bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-white text-base rounded-xl p-4 border ${aiError ? 'border-red-500' : 'border-gray-200 dark:border-gray-700'} focus:outline-none focus:ring-2 focus:ring-primary/50 transition-all min-h-[120px] resize-y`}
             ></textarea>
             
             {aiError && (
