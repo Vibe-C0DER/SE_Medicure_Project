@@ -1,6 +1,7 @@
 import React, { useCallback, useState, useEffect } from 'react';
 import { useLocation, Link } from 'react-router-dom';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
+import Navbar from '../components/Navbar';
 
 const libraries = ['places'];
 const mapContainerStyle = {
@@ -91,7 +92,7 @@ const SpecialistMap = () => {
 
   return (
     <div className="bg-background-light text-slate-900 font-sans overflow-hidden h-screen flex flex-col">
-      <header className="flex-none z-50 bg-white border-b border-pink-100 px-6 py-3 shadow-sm">
+      {/* <header className="flex-none z-50 bg-white border-b border-pink-100 px-6 py-3 shadow-sm">
         <div className="flex items-center justify-between mx-auto w-full max-w-[1920px]">
           <div className="flex items-center gap-8">
             <Link className="flex items-center gap-3 text-slate-900 hover:opacity-80 transition-opacity" to="/">
@@ -110,7 +111,8 @@ const SpecialistMap = () => {
              </Link>
           </div>
         </div>
-      </header>
+      </header> */}
+      <Navbar/>
 
       <main className="flex-1 flex overflow-hidden relative">
         <aside className={`w-full md:w-[450px] lg:w-[400px] flex flex-col bg-white border-r border-slate-200 z-20 shadow-xl md:shadow-none flex-shrink-0 absolute md:relative h-full transform transition-transform duration-300 ease-in-out ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} md:translate-x-0`} id="sidebarPanel">

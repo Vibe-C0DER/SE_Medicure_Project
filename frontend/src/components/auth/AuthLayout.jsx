@@ -1,12 +1,13 @@
 import React from 'react';
 import Header from '../Header';
+import Navbar from '../Navbar';
 
 const AUTH_IMAGE = 'https://lh3.googleusercontent.com/aida-public/AB6AXuCoplcboiDPvjEfs7n9mgh0c2cpulE0pdPtuKLrxkJkl1AbqdnW8Yvz53XrULLgQKwOU4UpSTZm7x7uA-h_TAMsOPqcousVDPcCoed4TmOmRDBKLBVU9RAPPhdlUvUmiCEyyQZbU1Hz0oHPFhSheKklsRYd_JDOpIW-iH6JSYq7dvx_67jOvlDlUpwzO-sz7xD0pidB_hb5zio3ij8_3QEScLT9opmaz_ikUAVmB_5f45h8rSn3GJht2LGyknEbnwdW_Q3gzRpNOa2r';
 
 const AuthLayout = ({ children }) => {
   return (
     <div className="font-poppins bg-medicure-bg min-h-screen">
-      <Header />
+     <Navbar />
       <div className="pt-20 min-h-screen flex items-center justify-center p-4 lg:p-8">
       <div className="w-full max-w-[1280px] min-h-[850px] bg-white rounded-3xl shadow-2xl overflow-hidden flex flex-col lg:flex-row relative ring-1 ring-black/5">
         {/* Left panel - branding */}

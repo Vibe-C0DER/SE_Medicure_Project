@@ -37,31 +37,60 @@ const Navbar = () => {
               Medi<span className="text-primary">Cure</span>
             </Link>
           </div>
+          {isAuthenticated && <nav className="hidden items-center gap-10 md:flex">
+                    <Link to="/" className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group">
+                      Home
+                      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
+                    </Link>
+                    <Link to="/symptoms" className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group">
+                      Find Doctors
+                      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
+                    </Link>
+                    <button 
+                      onClick={() => {
+                        if (window.location.pathname !== '/') {
+                          navigate('/');
+                          setTimeout(() => document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' }), 100);
+                        } else {
+                          document.getElementById('services')?.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }} 
+                      className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group"
+                    >
+                      Services
+                      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
+                    </button>
+                    <Link to="/" className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group">
+                      Articles
+                      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
+                    </Link>
+                  </nav> }
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center bg-pink-50 dark:bg-black/20 px-4 py-2 rounded-full border border-pink-100 dark:border-pink-900/20 w-72 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            
+            {/* <div className="hidden md:flex items-center bg-pink-50 dark:bg-black/20 px-4 py-2 rounded-full border border-pink-100 dark:border-pink-900/20 w-72 focus-within:ring-2 focus-within:ring-primary/20 transition-all">
               <span className="material-icons text-pink-400 text-sm">search</span>
               <input 
                 className="bg-transparent border-none text-sm w-full focus:ring-0 text-slate-700 dark:text-slate-200 placeholder-pink-300 dark:placeholder-pink-800/50 ml-2 transition-all" 
                 placeholder="Search conditions, doctors..." 
                 type="text"
               />
-            </div>
-            <button className="relative p-2 rounded-full text-pink-400 hover:text-primary hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all">
+            </div> */}
+            {/* <button className="relative p-2 rounded-full text-pink-400 hover:text-primary hover:bg-pink-50 dark:hover:bg-pink-900/20 transition-all">
               <span className="material-icons">notifications_none</span>
               <span className="absolute top-2 right-2 h-2 w-2 bg-primary rounded-full ring-2 ring-white dark:ring-[#2d1522] transition-all"></span>
-            </button>
-            <div className="flex items-center gap-3 pl-4 border-l border-pink-100 dark:border-pink-900/30">
+            </button> */}
+            {/* <div className="flex items-center gap-3 pl-4 border-l border-pink-100 dark:border-pink-900/30">
               <div className="text-right hidden sm:block">
                 <p className="text-xs font-semibold text-slate-900 dark:text-white">{displayName}</p>
                 <p className="text-[10px] text-pink-500">
                   {isAuthenticated ? 'Member' : 'Not logged in'}
                 </p>
               </div>
-              <img 
+              <Link to="/profile"><img 
                 alt="User profile picture" 
                 className="h-10 w-10 rounded-full object-cover ring-2 ring-pink-200 dark:ring-pink-900 hover:ring-primary transition-all cursor-pointer" 
                 src={user?.avatar || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
-              />
+              /></Link>
               {isAuthenticated ? (
                 <button
                   onClick={handleLogout}
@@ -79,7 +108,55 @@ const Navbar = () => {
                   Login
                 </Link>
               )}
-            </div>
+            </div> */}
+
+            <div className="flex items-center gap-4">
+                    {isAuthenticated ? (
+                      // <Link
+                      //   to="/profile"
+                      //   className="group flex items-center justify-center rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-primary hover:shadow-pink-200 active:scale-95"
+                      // >
+                      //   {displayName}
+                      //   <span className="material-symbols-outlined ml-1 text-sm transition-transform group-hover:translate-x-1">
+                      //     person
+                      //   </span>
+                      // </Link>
+                      <>
+              <Link to="/profile"><img 
+                alt="User profile picture" 
+                className="h-10 w-10 rounded-full object-cover ring-2 ring-pink-200 dark:ring-pink-900 hover:ring-primary transition-all cursor-pointer" 
+                src={user?.avatar || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
+              /></Link>
+              
+                <button
+                  onClick={handleLogout}
+                  className="ml-2 hidden md:inline-flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 dark:text-slate-200 hover:text-primary hover:bg-pink-50 dark:hover:bg-pink-900/20 rounded-full transition-all"
+                >
+                  <span className="material-icons text-[18px]">logout</span>
+                  Logout
+                </button>
+                </>
+              
+                    ) : (
+                      <>
+                        <Link
+                          to="/login"
+                          className="hidden text-sm font-bold text-gray-500 transition hover:text-primary lg:block"
+                        >
+                          Log In
+                        </Link>
+                        <Link
+                          to="/register"
+                          className="group flex items-center justify-center rounded-full bg-gray-900 px-6 py-2.5 text-sm font-bold text-white shadow-lg shadow-gray-200 transition hover:bg-primary hover:shadow-pink-200 active:scale-95"
+                        >
+                          Get Started
+                          <span className="material-symbols-outlined ml-1 text-sm transition-transform group-hover:translate-x-1">
+                            arrow_forward
+                          </span>
+                        </Link>
+                      </>
+                    )}
+                  </div>
           </div>
         </div>
       </div>

@@ -1,10 +1,12 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Services = () => {
   const services = [
     {
       icon: 'vital_signs',
       title: 'AI Symptom Checker',
+      link:'/symptoms',
       description: 'Not feeling well? Input your symptoms and get an instant, AI-powered preliminary assessment before visiting a doctor.',
       linkText: 'Start Assessment',
       linkColor: 'text-primary',
@@ -38,7 +40,7 @@ const Services = () => {
   ];
 
   return (
-    <section className="bg-white px-4 py-24 lg:px-24 relative overflow-hidden">
+    <section id="services" className="bg-white px-4 py-24 lg:px-24 relative overflow-hidden">
       <div className="absolute top-0 right-0 w-1/3 h-full bg-gradient-to-l from-pink-50/50 to-transparent"></div>
       
       <div className="mx-auto max-w-7xl relative z-10">
@@ -63,7 +65,15 @@ const Services = () => {
                 <h3 className="mb-3 text-xl font-bold text-gray-900">{service.title}</h3>
                 <p className="text-gray-500 leading-relaxed mb-6">{service.description}</p>
                 <div className="mt-auto pt-6 border-t border-gray-50">
-                  <span className={`text-sm font-bold ${service.linkColor} group-hover:underline decoration-2 underline-offset-4`}>{service.linkText}</span>
+                  <Link to={service.link}><span className={`text-sm font-bold ${service.linkColor} group-hover:underline decoration-2 underline-offset-4`} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>{service.linkText}</span></Link>
+                  {/* <Link 
+                    to={service.link || '#'} 
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                  >
+                    <span className={`text-sm font-bold ${service.linkColor} group-hover:underline decoration-2 underline-offset-4`}>
+                      {service.linkText}
+                    </span>
+                  </Link> */}
                 </div>
               </div>
             </div>
