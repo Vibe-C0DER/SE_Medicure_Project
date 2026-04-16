@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyReports, downloadReportPDF } from '../api/report';
+import Navbar from '../components/Navbar';
 
 const MyReports = () => {
   const [reports, setReports] = useState([]);
@@ -48,6 +49,7 @@ const MyReports = () => {
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-white min-h-screen flex flex-col font-display antialiased">
       {/* Header handled by App layout, but ensuring consistent main styling */}
+      <Navbar/>
       <main className="flex-1 w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div className="flex flex-col gap-2">
@@ -99,7 +101,7 @@ const MyReports = () => {
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Date</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Symptoms Reported</th>
                       <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Analysis Result</th>
-                      <th className="px-6 py-4 text-left text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Status</th>
+                      
                       <th className="px-6 py-4 text-right text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">Report</th>
                     </tr>
                   </thead>
@@ -119,12 +121,12 @@ const MyReports = () => {
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-slate-600 dark:text-slate-300 font-medium">
                           {report.topDisease?.name || 'Unknown'}
                         </td>
-                        <td className="px-6 py-4 whitespace-nowrap">
+                        {/* <td className="px-6 py-4 whitespace-nowrap">
                           <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 dark:bg-emerald-900/20 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800">
                             <span className="material-symbols-outlined text-[14px]">check_circle</span>
                             Analysed
                           </span>
-                        </td>
+                        </td> */}
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex items-center justify-end gap-3 opacity-90 sm:opacity-80 sm:group-hover:opacity-100 transition-opacity">
                             <button 

@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
+import Navbar from '../components/Navbar';
 
 const DISEASE_THEMES = {
   'Migraine': {
@@ -314,7 +315,7 @@ const PredictionResult = () => {
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-[#0e121b] font-sans antialiased overflow-x-hidden selection:bg-pink-200 selection:text-pink-900">
       <div className="relative flex min-h-screen w-full flex-col">
-        <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-pink-200/60 bg-white/80 backdrop-blur-md px-10 py-4 shadow-sm">
+        {/* <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-pink-200/60 bg-white/80 backdrop-blur-md px-10 py-4 shadow-sm">
           <div className="flex items-center gap-3 text-[#0e121b]">
             <div className="flex items-center justify-center size-10 rounded-xl bg-pink-100 text-[#db2777] shadow-sm">
               <span className="material-symbols-outlined text-[28px]">medical_services</span>
@@ -347,7 +348,8 @@ const PredictionResult = () => {
               }}
             />
           </div>
-        </header>
+        </header> */}
+        <Navbar/>
 
         <div className="flex flex-1 justify-center py-10 px-4 sm:px-6 lg:px-8">
           <div className="flex w-full max-w-[1280px] gap-8 flex-col lg:flex-row">

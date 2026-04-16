@@ -5,6 +5,7 @@ import { predictDiseases } from '../api/prediction.js';
 import { aiApi } from '../api/ai.js';
 import { validateSymptomSelection, validateSymptomSearch } from '../utils/validation/symptom.validation.js';
 import { validateAiInput } from '../utils/validation/ai.validation.js';
+import Navbar from '../components/Navbar.jsx';
 
 const FALLBACK_SYMPTOMS = [
   {
@@ -270,7 +271,7 @@ const SymptomInput = () => {
 
   return (
     <div className="bg-background-light dark:bg-background-dark text-slate-700 dark:text-gray-200 font-display antialiased min-h-screen flex flex-col">
-      <header className="bg-white dark:bg-gray-900 border-b border-pink-100 dark:border-gray-800 sticky top-0 z-50 backdrop-blur-sm bg-white/90">
+      {/* <header className="bg-white dark:bg-gray-900 border-b border-pink-100 dark:border-gray-800 sticky top-0 z-50 backdrop-blur-sm bg-white/90">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="size-10 text-primary flex items-center justify-center bg-primary-light/50 rounded-xl">
@@ -323,7 +324,8 @@ const SymptomInput = () => {
             </Link>
           </div>
         </div>
-      </header>
+      </header> */}
+      <Navbar/>
 
       <main className="flex-1 w-full max-w-[1440px] mx-auto px-4 sm:px-6 py-8 md:py-12 grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-start">
         <div className="lg:col-span-8 flex flex-col gap-8">

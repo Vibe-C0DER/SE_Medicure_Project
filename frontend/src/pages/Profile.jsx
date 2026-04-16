@@ -225,27 +225,27 @@ const Profile = () => {
                   Profile
                 </Link>
                 <Link 
-                  to="#" 
+                  to="/reports/me" 
                   className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group"
                 >
                   <span className="material-icons mr-3 text-[20px] text-slate-400 group-hover:text-pink-400 transition-colors">monitor_heart</span>
                   Health Records
                 </Link>
-                <Link 
+                {/* <Link 
                   to="#" 
                   className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group"
                 >
                   <span className="material-icons mr-3 text-[20px] text-slate-400 group-hover:text-pink-400 transition-colors">calendar_month</span>
                   Appointments
-                </Link>
-                <Link 
+                </Link> */}
+                {/* <Link 
                   to="#" 
                   className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group"
                 >
                   <span className="material-icons mr-3 text-[20px] text-slate-400 group-hover:text-pink-400 transition-colors">favorite_border</span>
                   Favorites
-                </Link>
-                <div className="pt-4 mt-4 border-t border-pink-50 dark:border-pink-900/20">
+                </Link> */}
+                {/* <div className="pt-4 mt-4 border-t border-pink-50 dark:border-pink-900/20">
                   <Link 
                     to="#" 
                     className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group"
@@ -260,7 +260,7 @@ const Profile = () => {
                     <span className="material-icons mr-3 text-[20px] text-slate-400 group-hover:text-pink-400 transition-colors">lock</span>
                     Privacy
                   </Link>
-                </div>
+                </div> */}
               </nav>
             </div>
             

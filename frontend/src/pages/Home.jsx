@@ -5,12 +5,13 @@ import Services from '../components/Services';
 import About from '../components/About';
 import CTA from '../components/CTA';
 import Footer from '../components/Footer';
+import Navbar from '../components/Navbar';
 
 const Home = () => {
   return (
     <div className="relative flex min-h-screen w-full flex-col">
-      <Header />
-      <main className="flex-grow pt-20">
+      <Navbar />
+      <main className="flex-grow">
         <Hero />
         <Services />
         <About />

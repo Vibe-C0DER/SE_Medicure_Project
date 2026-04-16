@@ -13,7 +13,7 @@ import ReportDetails from './pages/ReportDetails';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import { getMe } from './api/user';
-import { setCredentials } from './store/authSlice';
+import { setCredentials, logout } from './store/authSlice';
 
 function App() {
   const dispatch = useDispatch();
@@ -24,7 +24,7 @@ function App() {
         const res = await getMe();
         if (res?.data) dispatch(setCredentials({ user: res.data }));
       } catch {
-        // Not logged in (or backend unreachable) - ignore.
+        dispatch(logout());
       }
     };
     bootstrap();
@@ -34,7 +34,14 @@ function App() {
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/symptoms" element={<SymptomInput />} />
+        <Route 
+          path="/symptoms" 
+          element={
+            <ProtectedRoute>
+              <SymptomInput />
+            </ProtectedRoute>
+          } 
+        />
         <Route
           path="/login"
           element={
@@ -62,20 +69,27 @@ function App() {
         <Route
           path="/reports/me"
           element={
-            
+            <ProtectedRoute>
               <MyReports />
-            
+            </ProtectedRoute>
           }
         />
         <Route
           path="/reports/:id"
           element={
-            
+            <ProtectedRoute>
               <ReportDetails />
-            
+            </ProtectedRoute>
           }
         />
-        <Route path="/prediction-result" element={<PredictionResult />} />
+        <Route 
+          path="/prediction-result" 
+          element={
+            <ProtectedRoute>
+              <PredictionResult />
+            </ProtectedRoute>
+          } 
+        />
         <Route path="/specialists" element={<SpecialistMap />} />
       </Routes>
     </BrowserRouter>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import AuthLayout from '../components/auth/AuthLayout';
 import { signin } from '../api/auth';
@@ -8,6 +8,7 @@ import { validateLogin } from '../utils/validation/auth.validation';
 
 const Login = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const dispatch = useDispatch();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -42,9 +43,13 @@ const Login = () => {
       const payload = res?.data || {};
       const { data } = payload;
       if (data?.user) {
+        localStorage.setItem('keepLoggedIn', keepLoggedIn ? 'true' : 'false');
         dispatch(setCredentials({ user: data.user }));
       }
-      navigate('/');
+      
+      const from = location.state?.from?.pathname || '/';
+      // Force reload rendering to re-evaluate the Redux persist storage dynamically.
+      window.location.href = from;
     } catch (err) {
       if (err.message === 'Network Error' || !err.response) {
         setError(
