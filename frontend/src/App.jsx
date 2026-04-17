@@ -10,6 +10,8 @@ import PredictionResult from './pages/PredictionResult';
 import SpecialistMap from './pages/SpecialistMap';
 import MyReports from './pages/MyReports';
 import ReportDetails from './pages/ReportDetails';
+import Article from './pages/Article';
+import ArticlesList from './pages/ArticlesList';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import { getMe } from './api/user';
@@ -90,6 +92,8 @@ function App() {
             </ProtectedRoute>
           } 
         />
+        <Route path="/articles" element={<ArticlesList />} />
+        <Route path="/articles/:id" element={<Article />} />
         <Route path="/specialists" element={<SpecialistMap />} />
       </Routes>
     </BrowserRouter>

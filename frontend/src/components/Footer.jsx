@@ -1,17 +1,17 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const Footer = () => {
   const footerLinks = {
     services: [
-      { label: 'Find Doctors', href: '#' },
-      { label: 'Symptom Checker', href: '#' },
-      { label: 'Telemedicine', href: '#' },
-      { label: 'Lab Tests', href: '#' }
+      { label: 'Find Doctors', href: '/' },
+      { label: 'Symptom Checker', href: '/symptoms' },
+      
+      { label: 'Articles', href: '/articles' }
     ],
     company: [
       { label: 'About Us', href: '#' },
-      { label: 'Careers', href: '#' },
-      { label: 'Blog', href: '#' },
+      { label: 'Blog', href: '/articles' },
       { label: 'Contact', href: '#' }
     ],
     legal: [
@@ -35,7 +35,7 @@ const Footer = () => {
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs mb-6">
               Making healthcare human-centric. We connect you with the right care at the right time, with kindness and precision.
             </p>
-            <div className="flex gap-4">
+            {/* <div className="flex gap-4">
               <a className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 transition-colors hover:bg-pink-100" href="#">
                 <span className="text-lg font-bold">f</span>
               </a>
@@ -45,7 +45,7 @@ const Footer = () => {
               <a className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 transition-colors hover:bg-pink-100" href="#">
                 <span className="text-lg font-bold">in</span>
               </a>
-            </div>
+            </div> */}
           </div>
           
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8">
@@ -54,9 +54,9 @@ const Footer = () => {
               <ul className="space-y-4">
                 {footerLinks.services.map((link, index) => (
                   <li key={index}>
-                    <a className="text-sm text-gray-500 hover:text-primary transition-colors" href={link.href}>
+                    <Link className="text-sm text-gray-500 hover:text-primary transition-colors" to={link.href}>
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -67,9 +67,9 @@ const Footer = () => {
               <ul className="space-y-4">
                 {footerLinks.company.map((link, index) => (
                   <li key={index}>
-                    <a className="text-sm text-gray-500 hover:text-primary transition-colors" href={link.href}>
+                    <Link className="text-sm text-gray-500 hover:text-primary transition-colors" to={link.href}>
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -80,9 +80,9 @@ const Footer = () => {
               <ul className="space-y-4">
                 {footerLinks.legal.map((link, index) => (
                   <li key={index}>
-                    <a className="text-sm text-gray-500 hover:text-primary transition-colors" href={link.href}>
+                    <Link className="text-sm text-gray-500 hover:text-primary transition-colors" to={link.href}>
                       {link.label}
-                    </a>
+                    </Link>
                   </li>
                 ))}
               </ul>

@@ -1,6 +1,19 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const CTA = () => {
+  const navigate = useNavigate();
+  const { isAuthenticated } = useSelector((s) => s.auth);
+
+  const handleGetStarted = () => {
+    if (isAuthenticated) {
+      navigate('/symptoms');
+    } else {
+      navigate('/login');
+    }
+  };
+
   return (
     <section className="relative py-24 lg:py-32 overflow-hidden bg-gray-900">
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
@@ -14,12 +27,15 @@ const CTA = () => {
           Join thousands of others who have found a better way to manage their wellbeing. Simple, secure, and supportive.
         </p>
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
-          <button className="w-full sm:w-auto min-w-[160px] rounded-full bg-primary px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-900/50 transition-all hover:bg-primary-hover hover:scale-105">
+          <button 
+            onClick={handleGetStarted}
+            className="w-full sm:w-auto min-w-[160px] rounded-full bg-primary px-8 py-4 text-base font-bold text-white shadow-lg shadow-pink-900/50 transition-all hover:bg-primary-hover hover:scale-105"
+          >
             Get Started Free
           </button>
-          <button className="w-full sm:w-auto min-w-[160px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-8 py-4 text-base font-bold text-white transition-all hover:bg-white/20">
+          {/* <button className="w-full sm:w-auto min-w-[160px] rounded-full bg-white/10 backdrop-blur-sm border border-white/20 px-8 py-4 text-base font-bold text-white transition-all hover:bg-white/20">
             View Demo
-          </button>
+          </button> */}
         </div>
       </div>
     </section>

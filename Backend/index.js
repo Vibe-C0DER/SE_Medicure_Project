@@ -10,6 +10,7 @@ import diseaseRouter from './routes/disease.route.js';
 import predictionRouter from './routes/prediction.routes.js';
 import aiRouter from './routes/ai.routes.js';
 import { userReportRouter, adminReportRouter } from './routes/report.route.js';
+import articleRouter from './routes/article.routes.js';
 import connectDB from './db/connectDB.js';
 
 dotenv.config();
@@ -36,6 +37,7 @@ app.use('/api/predict', predictionRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/reports', userReportRouter);
 app.use('/api/admin/reports', adminReportRouter);
+app.use('/api/articles', articleRouter);
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;
