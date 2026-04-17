@@ -15,10 +15,7 @@ const router = express.Router();
 router.get('/', verifyToken, getAllDiseases);
 router.get('/:id', verifyToken, getDiseaseById);
 
-// Admin-only management
-router.post('/', verifyToken, authRoles('admin'), createDisease);
-router.put('/:id', verifyToken, authRoles('admin'), updateDisease);
-router.delete('/:id', verifyToken, authRoles('admin'), deleteDisease);
+
 
 export default router;
 
