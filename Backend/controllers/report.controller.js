@@ -159,3 +159,14 @@ export const downloadReportPDF = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteReport = async (req, res, next) => {
+  try {
+    const report = await Report.findByIdAndDelete(req.params.id);
+    if (!report) return next(errorHandler(404, 'Report not found'));
+    res.status(200).json({ success: true, message: 'Report deleted successfully' });
+  } catch (error) {
+    next(error);
+  }
+};
+

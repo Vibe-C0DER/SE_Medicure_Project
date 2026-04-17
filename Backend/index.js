@@ -9,8 +9,14 @@ import symptomRouter from './routes/symptom.route.js';
 import diseaseRouter from './routes/disease.route.js';
 import predictionRouter from './routes/prediction.routes.js';
 import aiRouter from './routes/ai.routes.js';
-import { userReportRouter, adminReportRouter } from './routes/report.route.js';
+import { userReportRouter } from './routes/report.route.js';
 import articleRouter from './routes/article.routes.js';
+import adminDiseaseRouter from './routes/admin/admin.disease.routes.js';
+import adminSymptomRouter from './routes/admin/admin.symptom.routes.js';
+import adminArticleRouter from './routes/admin/admin.article.routes.js';
+import adminReportRouter from './routes/admin/admin.report.routes.js';
+import adminDashboardRouter from './routes/admin/admin.dashboard.routes.js';
+import adminUsersRouter from './routes/admin/admin.users.routes.js';
 import connectDB from './db/connectDB.js';
 
 dotenv.config();
@@ -36,8 +42,14 @@ app.use('/api/diseases', diseaseRouter);
 app.use('/api/predict', predictionRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/reports', userReportRouter);
-app.use('/api/admin/reports', adminReportRouter);
 app.use('/api/articles', articleRouter);
+app.use('/api/admin/diseases', adminDiseaseRouter);
+app.use('/api/admin/symptoms', adminSymptomRouter);
+app.use('/api/admin/articles', adminArticleRouter);
+app.use('/api/admin/reports', adminReportRouter);
+app.use('/api/admin/dashboard', adminDashboardRouter);
+app.use('/api/admin/users', adminUsersRouter);
+
 
 app.use((err, req, res, next) => {
   const statusCode = err.statusCode || 500;

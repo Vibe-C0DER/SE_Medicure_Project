@@ -22,7 +22,6 @@ userReportRouter.get('/me', verifyToken, getUserReports);
 userReportRouter.get('/:id', verifyToken, getReportById);
 userReportRouter.get('/:id/pdf', verifyToken, downloadReportPDF);
 
-// Admin Report Routes (/api/admin/reports)
-adminReportRouter.get('/', verifyToken, authRoles('admin'), getAllReportsAdmin);
+
 
 export { userReportRouter, adminReportRouter };

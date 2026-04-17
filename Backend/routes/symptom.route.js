@@ -15,10 +15,6 @@ const router = express.Router();
 router.get('/', getAllSymptoms);
 router.get('/:id', getSymptomById);
 
-// Admin-only management
-router.post('/', verifyToken, authRoles('admin', 'user'), createSymptom);
-router.put('/:id', verifyToken, authRoles('admin', 'user'), updateSymptom);
-router.delete('/:id', verifyToken, authRoles('admin', 'user'), deleteSymptom);
 
 export default router;
 

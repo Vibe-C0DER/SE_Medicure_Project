@@ -75,3 +75,39 @@ export const getArticleById = async (req, res) => {
     return res.status(500).json({ message: 'Failed to fetch article', error: error.message });
   }
 };
+
+export const createArticle = async (req, res) => {
+  try {
+    const newArticle = new Article({ ...req.body });
+    await newArticle.save();
+    if (newArticle.disease) {
+      await Disease.findByIdAndUpdate(newArticle.disease, { article: newArticle._id });
+    }
+    return res.status(201).json(newArticle);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to create article', error: error.message });
+  }
+};
+
+export const updateArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedArticle = await Article.findByIdAndUpdate(id, { $set: req.body }, { new: true, runValidators: true });
+    if (!updatedArticle) return res.status(404).json({ message: 'Article not found' });
+    return res.status(200).json(updatedArticle);
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to update article', error: error.message });
+  }
+};
+
+export const deleteArticle = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await Article.findByIdAndUpdate(id, { isActive: false }, { new: true });
+    if (!deleted) return res.status(404).json({ message: 'Article not found' });
+    return res.status(200).json({ message: 'Article deleted successfully' });
+  } catch (error) {
+    return res.status(500).json({ message: 'Failed to delete article', error: error.message });
+  }
+};
+
