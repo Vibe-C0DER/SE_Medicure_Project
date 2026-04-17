@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
+import { getArticleByDiseaseId } from '../api/articles.api';
 
 const DISEASE_THEMES = {
   'Migraine': {
@@ -239,6 +240,20 @@ const PredictionResult = () => {
   const navigate = useNavigate();
   const [isLocating, setIsLocating] = useState(false);
   const [locationError, setLocationError] = useState(null);
+  const [fetchingArticle, setFetchingArticle] = useState(null);
+
+  const handleDetailsClick = async (diseaseId, diseaseName) => {
+    setFetchingArticle(diseaseName);
+    try {
+      const { data } = await getArticleByDiseaseId(diseaseId);
+      navigate(`/articles/${data._id}`);
+    } catch (err) {
+      console.error(err);
+      alert('Failed to load the article. Please try again later.');
+    } finally {
+      setFetchingArticle(null);
+    }
+  };
 
   const handleFindNearby = () => {
     setIsLocating(true);
@@ -314,6 +329,15 @@ const PredictionResult = () => {
 
   return (
     <div className="min-h-screen bg-background-light dark:bg-background-dark text-[#0e121b] font-sans antialiased overflow-x-hidden selection:bg-pink-200 selection:text-pink-900">
+      {fetchingArticle && (
+        <div className="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-white/70 backdrop-blur-sm">
+          <div className="flex flex-col items-center gap-4 bg-white p-8 rounded-2xl shadow-2xl border border-pink-100">
+             <span className="material-symbols-outlined text-[48px] animate-bounce text-[#db2777]">article</span>
+             <p className="font-bold text-slate-800 text-lg">Fetching details for {fetchingArticle}...</p>
+             <p className="text-sm font-medium text-pink-500">Generating comprehensive article via AI if not available.</p>
+          </div>
+        </div>
+      )}
       <div className="relative flex min-h-screen w-full flex-col">
         {/* <header className="sticky top-0 z-50 flex items-center justify-between whitespace-nowrap border-b border-pink-200/60 bg-white/80 backdrop-blur-md px-10 py-4 shadow-sm">
           <div className="flex items-center gap-3 text-[#0e121b]">
@@ -484,8 +508,9 @@ const PredictionResult = () => {
                               </div>
                             </div>
                             <button
-                              className="flex items-center gap-1 text-[#db2777] text-sm font-bold hover:gap-2 transition-all"
-                              type="button"
+                              onClick={() => handleDetailsClick(p.diseaseId, p.diseaseName)}
+                              className="flex items-center gap-1 text-[#db2777] text-sm font-bold hover:gap-2 transition-all disabled:opacity-50"
+                              disabled={fetchingArticle !== null}
                             >
                               Details{' '}
                               <span className="material-symbols-outlined text-[18px]">

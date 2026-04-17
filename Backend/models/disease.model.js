@@ -44,6 +44,10 @@ const diseaseSchema = new Schema(
       type: Boolean,
       default: true,
     },
+    article: {
+      type: Schema.Types.ObjectId,
+      ref: 'Article',
+    },
   },
   { timestamps: true }
 );

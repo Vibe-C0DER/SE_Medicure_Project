@@ -29,6 +29,7 @@ const Services = () => {
     {
       icon: 'library_books',
       title: 'Knowledge Hub',
+      link : '/articles',
       description: 'Empower yourself with medically reviewed articles, wellness guides, and health tips written by experts in plain language.',
       linkText: 'Explore Library',
       linkColor: 'text-purple-600',
