@@ -60,6 +60,10 @@ const Navbar = () => {
                       Services
                       <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
                     </button>
+                    <Link to="/about" className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group">
+                      About
+                      <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>
+                    </Link>
                     <Link to="/articles" className="relative text-sm font-semibold text-gray-600 transition hover:text-primary group">
                       Articles
                       <span className="absolute -bottom-1 left-0 h-0.5 w-0 bg-primary transition-all group-hover:w-full"></span>

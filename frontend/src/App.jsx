@@ -12,6 +12,7 @@ import MyReports from './pages/MyReports';
 import ReportDetails from './pages/ReportDetails';
 import Article from './pages/Article';
 import ArticlesList from './pages/ArticlesList';
+import About from './pages/About';
 import ProtectedRoute from './components/routing/ProtectedRoute';
 import PublicRoute from './components/routing/PublicRoute';
 import AdminRoute from './components/routing/AdminRoute';
@@ -104,6 +105,7 @@ function App() {
         <Route path="/articles" element={<ArticlesList />} />
         <Route path="/articles/:id" element={<Article />} />
         <Route path="/specialists" element={<SpecialistMap />} />
+        <Route path="/about" element={<About />} />
 
         {/* Admin Panel */}
         <Route path="/admin/login" element={<AdminLogin />} />
