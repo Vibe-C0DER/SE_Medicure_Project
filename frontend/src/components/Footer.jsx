@@ -10,9 +10,9 @@ const Footer = () => {
       { label: 'Articles', href: '/articles' }
     ],
     company: [
-      { label: 'About Us', href: '#' },
+      { label: 'About Us', href: '/about' },
       { label: 'Blog', href: '/articles' },
-      { label: 'Contact', href: '#' }
+      { label: 'Contact', href: '/contact' }
     ],
     legal: [
       { label: 'Privacy Policy', href: '#' },
@@ -67,7 +67,7 @@ const Footer = () => {
               <ul className="space-y-4">
                 {footerLinks.company.map((link, index) => (
                   <li key={index}>
-                    <Link className="text-sm text-gray-500 hover:text-primary transition-colors" to={link.href}>
+                    <Link className="text-sm text-gray-500 hover:text-primary transition-colors" to={link.href} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
                       {link.label}
                     </Link>
                   </li>

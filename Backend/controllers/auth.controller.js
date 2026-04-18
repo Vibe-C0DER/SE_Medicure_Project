@@ -2,6 +2,9 @@ import User from '../models/user.model.js';
 import bcryptjs from 'bcryptjs';
 import { errorHandler } from '../errors/error.js';
 import jwt from 'jsonwebtoken';
+import { OAuth2Client } from 'google-auth-library';
+
+const client = new OAuth2Client();
 
 export const signup = async (req, res, next) => {
   try {
@@ -77,4 +80,85 @@ export const signOut = async (req, res, next) => {
     next(error);
   }
 };
+
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { credential, access_token } = req.body;
+    
+    let email, name, picture;
+
+    if (credential) {
+      const ticket = await client.verifyIdToken({
+        idToken: credential,
+        audience: process.env.GOOGLE_CLIENT_ID,
+      });
+      const payload = ticket.getPayload();
+      email = payload.email;
+      name = payload.name;
+      picture = payload.picture;
+    } else if (access_token) {
+      const resp = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+        headers: { Authorization: `Bearer ${access_token}` }
+      });
+      const data = await resp.json();
+      if (!resp.ok) {
+        return next(errorHandler(400, 'Invalid Google access token'));
+      }
+      email = data.email;
+      name = data.name;
+      picture = data.picture;
+    } else {
+      return next(errorHandler(400, 'Google credential token is required'));
+    }
+
+    let user = await User.findOne({ email });
+
+    if (!user) {
+      // Create new user, generating a secure random password since they login via Auth
+      const generatedPassword = Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8);
+      const hashedPassword = bcryptjs.hashSync(generatedPassword, 10);
+      
+      const firstName = name.split(' ')[0] || name;
+      const lastName = name.split(' ').slice(1).join(' ') || '';
+
+      user = new User({
+        firstName,
+        lastName,
+        email,
+        password: hashedPassword,
+        avatar: picture,
+      });
+      await user.save();
+    } else {
+      // User exists. Update avatar if missing so the frontend correctly shows it
+      if (!user.avatar && picture) {
+        user.avatar = picture;
+        await user.save();
+      }
+    }
+
+    const token = jwt.sign(
+      { id: user._id, role: user.role || 'user' },
+      process.env.JWT_SECRET
+    );
+    const userObj = user.toObject ? user.toObject() : user._doc || {};
+    const { password: _p, ...rest } = userObj;
+    
+    res
+      .cookie('access_token', token, { httpOnly: true, sameSite: 'lax', secure: false })
+      .status(200)
+      .json({
+        success: true,
+        message: 'Signed in with Google successfully',
+        data: {
+          user: rest,
+          token,
+        },
+      });
+  } catch (error) {
+    console.error('Google Auth Error:', error);
+    next(errorHandler(401, 'Google authentication failed or token is invalid'));
+  }
+};
+
 

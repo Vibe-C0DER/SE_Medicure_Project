@@ -303,6 +303,7 @@ const Profile = () => {
                       alt="Profile Avatar" 
                       className="h-32 w-32 rounded-full object-cover ring-4 ring-pink-50 dark:ring-pink-900 transition-all" 
                       src={avatarSrc}
+                      referrerPolicy="no-referrer"
                     />
                   </div>
                   <button
