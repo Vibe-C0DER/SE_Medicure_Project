@@ -35,17 +35,7 @@ const Footer = () => {
             <p className="text-sm text-gray-500 leading-relaxed max-w-xs mb-6">
               Making healthcare human-centric. We connect you with the right care at the right time, with kindness and precision.
             </p>
-            {/* <div className="flex gap-4">
-              <a className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 transition-colors hover:bg-pink-100" href="#">
-                <span className="text-lg font-bold">f</span>
-              </a>
-              <a className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 transition-colors hover:bg-pink-100" href="#">
-                <span className="text-lg font-bold">t</span>
-              </a>
-              <a className="h-10 w-10 rounded-full bg-pink-50 flex items-center justify-center text-pink-500 transition-colors hover:bg-pink-100" href="#">
-                <span className="text-lg font-bold">in</span>
-              </a>
-            </div> */}
+            
           </div>
           
           <div className="grid grid-cols-2 gap-8 sm:grid-cols-3 lg:col-span-8">

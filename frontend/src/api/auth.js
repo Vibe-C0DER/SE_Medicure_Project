@@ -12,3 +12,9 @@ export const signOut = () =>
 export const googleSignIn = (data) =>
   api.post('/api/auth/google', data);
 
+export const forgotPassword = (data) =>
+  api.post('/api/auth/forgot-password', data);
+
+export const resetPassword = (token, data) =>
+  api.post(`/api/auth/reset-password/${token}`, data);
+

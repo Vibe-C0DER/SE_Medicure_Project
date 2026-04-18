@@ -27,6 +27,8 @@ import AdminReports from './pages/admin/AdminReports';
 import AdminUsers from './pages/admin/AdminUsers';
 import AdminContact from './pages/admin/AdminContact';
 import Contact from './pages/Contact';
+import ForgotPassword from './pages/ForgotPassword';
+import ResetPassword from './pages/ResetPassword';
 import { getMe } from './api/user';
 import { setCredentials, logout } from './store/authSlice';
 
@@ -117,6 +119,22 @@ function App() {
                 <Contact />
               </ProtectedRoute>
             } 
+          />
+          <Route
+            path="/forgot-password"
+            element={
+              <PublicRoute>
+                <ForgotPassword />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/reset-password/:token"
+            element={
+              <PublicRoute>
+                <ResetPassword />
+              </PublicRoute>
+            }
           />
 
           {/* Admin Panel */}
