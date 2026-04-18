@@ -6,6 +6,7 @@ import { aiApi } from '../api/ai.js';
 import { validateSymptomSelection, validateSymptomSearch } from '../utils/validation/symptom.validation.js';
 import { validateAiInput } from '../utils/validation/ai.validation.js';
 import Navbar from '../components/Navbar.jsx';
+import Footer from '../components/Footer.jsx';
 
 const FALLBACK_SYMPTOMS = [
   {
@@ -65,7 +66,6 @@ const CHIPS = [
   'Digestive',
   'Skin',
   'General',
-  'Custom',
 ];
 
 const SymptomCard = ({ symptom, checked, onToggle }) => {
@@ -501,7 +501,7 @@ const SymptomInput = () => {
               </div>
             )})}
 
-            <button
+            {/* <button
               type="button"
               className="w-full py-5 text-base font-bold text-primary hover:text-white hover:bg-primary rounded-2xl border-2 border-dashed border-primary/30 hover:border-primary transition-all duration-300 flex items-center justify-center gap-2 group"
             >
@@ -509,7 +509,7 @@ const SymptomInput = () => {
                 add
               </span>
               Load More Symptoms
-            </button>
+            </button> */}
           </div>
         </div>
 
@@ -607,11 +607,11 @@ const SymptomInput = () => {
         </div>
       </main>
 
-      <footer className="mt-auto border-t border-pink-100/70 bg-white dark:bg-gray-900 py-10">
+      {/* <footer className="mt-auto border-t border-pink-100/70 bg-white dark:bg-gray-900 py-10">
         <div className="max-w-[1440px] mx-auto px-4 sm:px-6 flex flex-col md:flex-row justify-between items-center text-sm text-slate-500 gap-4">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary">monitor_heart</span>
-            <p>© 2024 Medicure Inc.</p>
+            <p>© 2026 Medicure Inc.</p>
           </div>
           <div className="flex gap-8 font-medium">
             <a className="hover:text-primary transition-colors" href="#">
@@ -620,12 +620,11 @@ const SymptomInput = () => {
             <a className="hover:text-primary transition-colors" href="#">
               Terms
             </a>
-            <a className="hover:text-primary transition-colors" href="#">
-              Support
-            </a>
+            
           </div>
         </div>
-      </footer>
+      </footer> */}
+      <Footer/>
     </div>
   );
 };

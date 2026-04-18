@@ -41,6 +41,7 @@ export const updateMe = async (req, res, next) => {
       'bio',
       'avatar',
       'currentSymptoms',
+      'emailPreferences',
     ];
     const updates = {};
     for (const key of allowed) {
@@ -116,6 +117,16 @@ export const updateMe = async (req, res, next) => {
         .map((v) => (typeof v === 'string' ? v.trim() : ''))
         .filter((v) => v.length > 0);
       updates.currentSymptoms = normalized;
+    }
+
+    if (Object.prototype.hasOwnProperty.call(updates, 'emailPreferences')) {
+      const val = updates.emailPreferences;
+      if (typeof val === 'object' && val !== null) {
+        if (typeof val.weeklyDigest !== 'undefined') {
+          updates['emailPreferences.weeklyDigest'] = Boolean(val.weeklyDigest);
+        }
+      }
+      delete updates.emailPreferences;
     }
 
     const updated = await User.findByIdAndUpdate(userId, updates, {

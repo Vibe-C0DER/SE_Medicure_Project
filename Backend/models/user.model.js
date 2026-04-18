@@ -69,6 +69,9 @@ const userSchema = new mongoose.Schema(
     },
     resetPasswordToken: String,
     resetPasswordExpires: Date,
+    emailPreferences: {
+      weeklyDigest: { type: Boolean, default: true },
+    },
   },
   { timestamps: true }
 );

@@ -65,8 +65,11 @@ app.use((err, req, res, next) => {
   });
 });
 
+import startWeeklyDigestCron from './jobs/weeklyDigest.job.js';
+
 const start = async () => {
   await connectDB();
+  startWeeklyDigestCron();
   app.listen(PORT, () => {
     console.log(`Auth server is running on port ${PORT}!`);
   });

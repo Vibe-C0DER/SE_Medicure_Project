@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
 const About = () => {
   const features = [
@@ -73,7 +74,7 @@ const About = () => {
             
             <div className="mt-4">
               <button className="inline-flex items-center justify-center rounded-full border-2 border-gray-900 bg-transparent px-8 py-3 text-base font-bold text-gray-900 transition-all hover:bg-gray-900 hover:text-white">
-                Learn More About Us
+                <Link to={'/about'} onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>Learn More About Us</Link>
               </button>
             </div>
           </div>
