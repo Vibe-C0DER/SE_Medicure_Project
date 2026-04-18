@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { useGoogleLogin } from '@react-oauth/google';
 import AuthLayout from '../components/auth/AuthLayout';
-import { signin } from '../api/auth';
+import { signin, googleSignIn } from '../api/auth';
 import { setCredentials } from '../store/authSlice';
 import { validateLogin } from '../utils/validation/auth.validation';
 
@@ -64,6 +65,37 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  const handleGoogleSuccess = async (tokenResponse) => {
+    try {
+      setLoading(true);
+      setError('');
+      const res = await googleSignIn({ access_token: tokenResponse.access_token });
+      const payload = res?.data || {};
+      const { data } = payload;
+      if (data?.user) {
+        localStorage.setItem('keepLoggedIn', keepLoggedIn ? 'true' : 'false');
+        dispatch(setCredentials({ user: data.user }));
+      }
+      
+      const from = location.state?.from?.pathname || '/';
+      window.location.href = from;
+    } catch (err) {
+      if (err.message === 'Network Error' || !err.response) {
+        setError('Cannot reach the server. Make sure the backend is running.');
+      } else {
+        const message = err.response?.data?.message || err.message || 'Google login failed.';
+        setError(message);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const loginWithGoogle = useGoogleLogin({
+    onSuccess: handleGoogleSuccess,
+    onError: () => setError('Google authentication failed')
+  });
 
   return (
     <AuthLayout>
@@ -165,14 +197,14 @@ const Login = () => {
               <span className="px-2 bg-white text-gray-400">Or continue with</span>
             </div>
           </div>
-          <div className="mt-6 grid grid-cols-2 gap-4">
-            <button type="button" className="flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
-              <img alt="Google Logo" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAXcCRae48RhEGVFswX6lLkx_iTf-FyBc-fFtSaRp1MTN1c106lRNBeXjEfAF0fR-m7KweR3iEWlWbOZC3dKo_aIrs3BgkveDtCqc88D9Fzc7plJVvfruzRYJS8ORes35bZLF6w0a6EBx_xmNyc4P7nyrSPhMT1G3XfMIkw17U3e6cnfkV0tmh6SeXh0OwJHb5K8xomYOlKgIBb6-tJqd3DVl178r6-b9GzYHJrRwf9lwr_gkEK3eW7zy8SG2Uug95UKSxpPv_0zLmW" />
-              <span className="text-sm font-medium text-gray-600">Google</span>
-            </button>
-            <button type="button" className="flex items-center justify-center gap-2 py-2.5 px-4 border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all duration-200">
-              <img alt="Apple Logo" className="w-5 h-5" src="https://lh3.googleusercontent.com/aida-public/AB6AXuB5-UvrLY0scUrb8T5wLH8rlUQg7pkXSlqQuddj7SwbmSU5b0p_jARM_eNUma4QfoHOTkxE2dsSh1IMI9z1f7UiPs8fqxVXwXx1632WOOLytzG9HjM6jEsip-jxxkDDjQfeVmDnA-fjTGP5ka1UUwX3N3rPNt8V8ZaX-EKAoA_Axys8ph0YzRhJTpXWdyY0EZkRp49Lj8xOa4tFKT0nxRN9STjecgEkaRX74WEfFTv3G5Zo21XMMMIJsb74V9w6tD8EBl6Ajdh5AWM-" />
-              <span className="text-sm font-medium text-gray-600">Apple</span>
+          <div className="mt-6">
+            <button 
+              type="button" 
+              onClick={() => loginWithGoogle()}
+              className="flex items-center justify-center gap-3 py-3 px-4 bg-white border border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 w-full transition-all duration-200 shadow-sm"
+            >
+              <img alt="Google" className="w-5 h-5" src="https://www.svgrepo.com/show/475656/google-color.svg" />
+              <span className="text-sm font-semibold text-gray-700">Continue with Google</span>
             </button>
           </div>
         </div>

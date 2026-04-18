@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
+import { GoogleOAuthProvider } from '@react-oauth/google';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
@@ -45,99 +46,101 @@ function App() {
   }, [dispatch]);
 
   return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Home />} />
-        <Route 
-          path="/symptoms" 
-          element={
-            <ProtectedRoute>
-              <SymptomInput />
-            </ProtectedRoute>
-          } 
-        />
-        <Route
-          path="/login"
-          element={
-            <PublicRoute>
-              <Login />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/register"
-          element={
-            <PublicRoute>
-              <Register />
-            </PublicRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports/me"
-          element={
-            <ProtectedRoute>
-              <MyReports />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/reports/:id"
-          element={
-            <ProtectedRoute>
-              <ReportDetails />
-            </ProtectedRoute>
-          }
-        />
-        <Route 
-          path="/prediction-result" 
-          element={
-            <ProtectedRoute>
-              <PredictionResult />
-            </ProtectedRoute>
-          } 
-        />
-        <Route path="/articles" element={<ArticlesList />} />
-        <Route path="/articles/:id" element={<Article />} />
-        <Route path="/specialists" element={<SpecialistMap />} />
-        <Route path="/about" element={<About />} />
-        <Route 
-          path="/contact" 
-          element={
-            <ProtectedRoute>
-              <Contact />
-            </ProtectedRoute>
-          } 
-        />
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID || 'place-holder'}>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Home />} />
+          <Route 
+            path="/symptoms" 
+            element={
+              <ProtectedRoute>
+                <SymptomInput />
+              </ProtectedRoute>
+            } 
+          />
+          <Route
+            path="/login"
+            element={
+              <PublicRoute>
+                <Login />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/register"
+            element={
+              <PublicRoute>
+                <Register />
+              </PublicRoute>
+            }
+          />
+          <Route
+            path="/profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports/me"
+            element={
+              <ProtectedRoute>
+                <MyReports />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/reports/:id"
+            element={
+              <ProtectedRoute>
+                <ReportDetails />
+              </ProtectedRoute>
+            }
+          />
+          <Route 
+            path="/prediction-result" 
+            element={
+              <ProtectedRoute>
+                <PredictionResult />
+              </ProtectedRoute>
+            } 
+          />
+          <Route path="/articles" element={<ArticlesList />} />
+          <Route path="/articles/:id" element={<Article />} />
+          <Route path="/specialists" element={<SpecialistMap />} />
+          <Route path="/about" element={<About />} />
+          <Route 
+            path="/contact" 
+            element={
+              <ProtectedRoute>
+                <Contact />
+              </ProtectedRoute>
+            } 
+          />
 
-        {/* Admin Panel */}
-        <Route path="/admin/login" element={<AdminLogin />} />
-        <Route
-          path="/admin"
-          element={
-            <AdminRoute>
-              <AdminLayout />
-            </AdminRoute>
-          }
-        >
-          <Route index element={<Dashboard />} />
-          <Route path="dashboard" element={<Dashboard />} />
-          <Route path="diseases" element={<AdminDiseases />} />
-          <Route path="symptoms" element={<AdminSymptoms />} />
-          <Route path="articles" element={<AdminArticles />} />
-          <Route path="reports" element={<AdminReports />} />
-          <Route path="users" element={<AdminUsers />} />
-          <Route path="messages" element={<AdminContact />} />
-        </Route>
-      </Routes>
-    </BrowserRouter>
+          {/* Admin Panel */}
+          <Route path="/admin/login" element={<AdminLogin />} />
+          <Route
+            path="/admin"
+            element={
+              <AdminRoute>
+                <AdminLayout />
+              </AdminRoute>
+            }
+          >
+            <Route index element={<Dashboard />} />
+            <Route path="dashboard" element={<Dashboard />} />
+            <Route path="diseases" element={<AdminDiseases />} />
+            <Route path="symptoms" element={<AdminSymptoms />} />
+            <Route path="articles" element={<AdminArticles />} />
+            <Route path="reports" element={<AdminReports />} />
+            <Route path="users" element={<AdminUsers />} />
+            <Route path="messages" element={<AdminContact />} />
+          </Route>
+        </Routes>
+      </BrowserRouter>
+    </GoogleOAuthProvider>
   );
 }
 

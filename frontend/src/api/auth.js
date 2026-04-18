@@ -8,3 +8,7 @@ export const signin = (data) =>
 
 export const signOut = () =>
   api.get('/api/auth/signout');
+
+export const googleSignIn = (data) =>
+  api.post('/api/auth/google', data);
+

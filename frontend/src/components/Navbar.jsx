@@ -98,6 +98,7 @@ const Navbar = () => {
                 alt="User profile picture" 
                 className="h-10 w-10 rounded-full object-cover ring-2 ring-pink-200 dark:ring-pink-900 hover:ring-primary transition-all cursor-pointer" 
                 src={user?.avatar || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
+                referrerPolicy="no-referrer"
               /></Link>
               {isAuthenticated ? (
                 <button
@@ -134,6 +135,7 @@ const Navbar = () => {
                 alt="User profile picture" 
                 className="h-10 w-10 rounded-full object-cover ring-2 ring-pink-200 dark:ring-pink-900 hover:ring-primary transition-all cursor-pointer" 
                 src={user?.avatar || "https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png"}
+                referrerPolicy="no-referrer"
               /></Link>
               
                 <button
