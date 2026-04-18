@@ -50,10 +50,7 @@ const Services = () => {
             <h2 className="font-display text-4xl font-bold tracking-tight text-gray-900 mb-4">Holistic Health Ecosystem</h2>
             <p className="text-lg text-gray-500 font-light">We've built a suite of tools designed to make healthcare accessible, understandable, and less intimidating for everyone.</p>
           </div>
-          <a className="group flex items-center gap-2 font-bold text-primary hover:text-primary-hover transition-colors" href="#">
-            View all services 
-            <span className="material-symbols-outlined transition-transform group-hover:translate-x-1">arrow_right_alt</span>
-          </a>
+          
         </div>
         
         <div className="grid gap-8 md:grid-cols-3">

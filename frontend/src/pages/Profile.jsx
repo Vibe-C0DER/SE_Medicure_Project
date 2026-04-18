@@ -16,6 +16,7 @@ const Profile = () => {
   const [success, setSuccess] = useState('');
   const [fieldErrors, setFieldErrors] = useState({});
   const [avatarUploading, setAvatarUploading] = useState(false);
+  const [digestSaving, setDigestSaving] = useState(false);
   const avatarInputRef = useRef(null);
 
   const derivedFullname = useMemo(() => {
@@ -31,6 +32,7 @@ const Profile = () => {
     gender: authUser?.gender ?? 'male',
     location: authUser?.location ?? 'India',
     bio: authUser?.bio ?? 'Add your bio here',
+    weeklyDigest: authUser?.emailPreferences?.weeklyDigest ?? true,
   });
 
   const avatarSrc =
@@ -45,8 +47,9 @@ const Profile = () => {
       gender: authUser?.gender ?? prev.gender,
       location: authUser?.location ?? prev.location,
       bio: authUser?.bio ?? prev.bio,
+      weeklyDigest: authUser?.emailPreferences?.weeklyDigest ?? prev.weeklyDigest,
     }));
-  }, [derivedFullname, authUser?.age, authUser?.gender, authUser?.location, authUser?.bio]);
+  }, [derivedFullname, authUser?.age, authUser?.gender, authUser?.location, authUser?.bio, authUser?.emailPreferences?.weeklyDigest]);
 
   useEffect(() => {
     const load = async () => {
@@ -80,7 +83,7 @@ const Profile = () => {
     });
     setFormData(prev => ({
       ...prev,
-      [name]: value
+      [name]: type === 'checkbox' ? checked : value
     }));
   };
 
@@ -129,6 +132,25 @@ const Profile = () => {
     } finally {
       setAvatarUploading(false);
       if (e.target) e.target.value = '';
+    }
+  };
+
+  const handleDigestToggle = async (e) => {
+    const newVal = e.target.checked;
+    setFormData(prev => ({ ...prev, weeklyDigest: newVal }));
+    setDigestSaving(true);
+    try {
+      const res = await updateMe({ emailPreferences: { weeklyDigest: newVal } });
+      if (res?.data) {
+        dispatch(setCredentials({ user: res.data }));
+        setSuccess('Email preferences updated.');
+        setTimeout(() => setSuccess(''), 3000);
+      }
+    } catch (err) {
+      setFormData(prev => ({ ...prev, weeklyDigest: !newVal }));
+      setError('Failed to update email preferences. Please try again.');
+    } finally {
+      setDigestSaving(false);
     }
   };
 
@@ -199,6 +221,7 @@ const Profile = () => {
       gender: authUser?.gender ?? 'male',
       location: authUser?.location ?? 'India',
       bio: authUser?.bio ?? 'Add your bio here',
+      weeklyDigest: authUser?.emailPreferences?.weeklyDigest ?? true,
     });
   };
 
@@ -231,6 +254,31 @@ const Profile = () => {
                   <span className="material-icons mr-3 text-[20px] text-slate-400 group-hover:text-pink-400 transition-colors">monitor_heart</span>
                   Health Records
                 </Link>
+
+                
+              
+              <div className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group">
+                <label className={`flex items-start cursor-pointer custom-checkbox relative select-none ${digestSaving ? 'opacity-50' : ''}`}>
+                  <input
+                    type="checkbox"
+                    name="weeklyDigest"
+                    className="sr-only"
+                    checked={formData.weeklyDigest}
+                    onChange={handleDigestToggle}
+                    disabled={digestSaving}
+                  />
+                  <div className={`mt-0.5 shrink-0 w-5 h-5 border rounded flex items-center justify-center transition-all duration-200 ${formData.weeklyDigest ? 'bg-primary border-primary' : 'bg-white border-slate-300 dark:bg-black/20 dark:border-slate-600'}`}>
+                    <svg className={`w-3.5 h-3.5 text-white pointer-events-none ${formData.weeklyDigest ? 'block' : 'hidden'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <span className="block text-sm text-slate-400 group-hover:text-pink-400 dark:text-slate-200 font-semibold transition-colors">Weekly Health Digest</span>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Receive an automated email summarizing your recent symptom checks and health insights.</p>
+                  </div>
+                </label>
+              </div>
+          
                 {/* <Link 
                   to="#" 
                   className="flex items-center px-4 py-3 text-slate-600 dark:text-slate-400 hover:bg-pink-50 dark:hover:bg-pink-900/10 hover:text-primary dark:hover:text-primary-light font-medium rounded-xl transition-all group"
@@ -263,6 +311,31 @@ const Profile = () => {
                 </div> */}
               </nav>
             </div>
+
+            {/* <div className="mt-6 bg-white dark:bg-[#2d1522] rounded-2xl shadow-soft p-5 border border-pink-100 dark:border-pink-900/20 transition-all">
+              <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-3">Email Preferences</h3>
+              <div className="flex flex-col gap-2">
+                <label className={`flex items-start cursor-pointer custom-checkbox relative select-none ${digestSaving ? 'opacity-50' : ''}`}>
+                  <input
+                    type="checkbox"
+                    name="weeklyDigest"
+                    className="sr-only"
+                    checked={formData.weeklyDigest}
+                    onChange={handleDigestToggle}
+                    disabled={digestSaving}
+                  />
+                  <div className={`mt-0.5 shrink-0 w-5 h-5 border rounded flex items-center justify-center transition-all duration-200 ${formData.weeklyDigest ? 'bg-primary border-primary' : 'bg-white border-slate-300 dark:bg-black/20 dark:border-slate-600'}`}>
+                    <svg className={`w-3.5 h-3.5 text-white pointer-events-none ${formData.weeklyDigest ? 'block' : 'hidden'}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" />
+                    </svg>
+                  </div>
+                  <div className="ml-3">
+                    <span className="block text-sm text-slate-800 dark:text-slate-200 font-semibold transition-colors">Weekly Health Digest</span>
+                    <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 leading-relaxed">Receive an automated email summarizing your recent symptom checks and health insights.</p>
+                  </div>
+                </label>
+              </div>
+            </div> */}
             
             {/* <div className="mt-6 bg-gradient-to-br from-primary to-pink-600 rounded-2xl p-6 text-white relative overflow-hidden shadow-lg shadow-pink-300/50 dark:shadow-none transition-all">
               <div className="absolute -top-10 -right-10 w-32 h-32 bg-white opacity-10 rounded-full blur-2xl"></div>
