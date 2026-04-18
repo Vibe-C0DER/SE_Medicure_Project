@@ -24,6 +24,7 @@ const AdminLayout = () => {
     { name: 'Symptoms', path: '/admin/symptoms', icon: 'sick' },
     { name: 'Articles', path: '/admin/articles', icon: 'article' },
     { name: 'Reports', path: '/admin/reports', icon: 'assessment' },
+    { name: 'Messages', path: '/admin/messages', icon: 'mail' },
   ];
 
   return (

@@ -32,3 +32,9 @@ export const getAdminUsers = (page = 1, search = '') =>
 export const updateUserRole = (id, role) => api.put(`/api/admin/users/${id}/role`, { role });
 export const updateUserStatus = (id, isActive) => api.put(`/api/admin/users/${id}/status`, { isActive });
 export const deleteUser = (id) => api.delete(`/api/admin/users/${id}`);
+
+// Contact Messages
+export const getAdminContactMessages = () => api.get('/api/admin/contact');
+export const markContactMessageRead = (id) => api.put(`/api/admin/contact/${id}/read`);
+export const deleteContactMessage = (id) => api.delete(`/api/admin/contact/${id}`);
+

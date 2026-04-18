@@ -151,7 +151,7 @@ const Dashboard = () => {
               <h3 className="font-bold text-slate-800">Articles This Week</h3>
               <p className="text-xs text-slate-400 mt-0.5">Medical articles generated in the last 7 days</p>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 bg-blue-100 text-blue-600 rounded-full">AI Generated</span>
+            <span className="text-xs font-bold px-2.5 py-1 bg-emerald-100 text-emerald-600 rounded-full">Live</span>
           </div>
           {articlesChartData.length > 0 ? (
             <ResponsiveContainer width="100%" height={350} >
