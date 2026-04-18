@@ -24,6 +24,8 @@ import AdminSymptoms from './pages/admin/AdminSymptoms';
 import AdminArticles from './pages/admin/AdminArticles';
 import AdminReports from './pages/admin/AdminReports';
 import AdminUsers from './pages/admin/AdminUsers';
+import AdminContact from './pages/admin/AdminContact';
+import Contact from './pages/Contact';
 import { getMe } from './api/user';
 import { setCredentials, logout } from './store/authSlice';
 
@@ -106,6 +108,14 @@ function App() {
         <Route path="/articles/:id" element={<Article />} />
         <Route path="/specialists" element={<SpecialistMap />} />
         <Route path="/about" element={<About />} />
+        <Route 
+          path="/contact" 
+          element={
+            <ProtectedRoute>
+              <Contact />
+            </ProtectedRoute>
+          } 
+        />
 
         {/* Admin Panel */}
         <Route path="/admin/login" element={<AdminLogin />} />
@@ -124,6 +134,7 @@ function App() {
           <Route path="articles" element={<AdminArticles />} />
           <Route path="reports" element={<AdminReports />} />
           <Route path="users" element={<AdminUsers />} />
+          <Route path="messages" element={<AdminContact />} />
         </Route>
       </Routes>
     </BrowserRouter>

@@ -17,6 +17,8 @@ import adminArticleRouter from './routes/admin/admin.article.routes.js';
 import adminReportRouter from './routes/admin/admin.report.routes.js';
 import adminDashboardRouter from './routes/admin/admin.dashboard.routes.js';
 import adminUsersRouter from './routes/admin/admin.users.routes.js';
+import contactRouter from './routes/contact.route.js';
+import adminContactRouter from './routes/admin/admin.contact.routes.js';
 import connectDB from './db/connectDB.js';
 
 dotenv.config();
@@ -43,12 +45,14 @@ app.use('/api/predict', predictionRouter);
 app.use('/api/ai', aiRouter);
 app.use('/api/reports', userReportRouter);
 app.use('/api/articles', articleRouter);
+app.use('/api/contact', contactRouter);
 app.use('/api/admin/diseases', adminDiseaseRouter);
 app.use('/api/admin/symptoms', adminSymptomRouter);
 app.use('/api/admin/articles', adminArticleRouter);
 app.use('/api/admin/reports', adminReportRouter);
 app.use('/api/admin/dashboard', adminDashboardRouter);
 app.use('/api/admin/users', adminUsersRouter);
+app.use('/api/admin/contact', adminContactRouter);
 
 
 app.use((err, req, res, next) => {
