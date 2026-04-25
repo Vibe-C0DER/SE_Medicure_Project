@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getAllArticles } from '../api/articles.api';
+import Footer from '../components/Footer';
 
 const ArticlesList = () => {
   const [articles, setArticles] = useState([]);
@@ -99,6 +100,9 @@ const ArticlesList = () => {
           )}
         </div>
       </main>
+
+      <Footer />
+      
     </div>
   );
 };

@@ -141,3 +141,17 @@ export const updateMe = async (req, res, next) => {
   }
 };
 
+export const deleteMe = async (req, res, next) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) return next(errorHandler(401, 'Unauthorized'));
+
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) return next(errorHandler(404, 'User not found'));
+
+    res.clearCookie('access_token').status(200).json({ message: 'User deleted successfully' });
+  } catch (err) {
+    next(err);
+  }
+};
+

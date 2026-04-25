@@ -4,6 +4,7 @@ import { useSelector } from 'react-redux';
 import { GoogleMap, useJsApiLoader, Marker, InfoWindow } from '@react-google-maps/api';
 import Navbar from '../components/Navbar';
 import { calculateDistance, formatDistance } from '../utils/distance';
+import Footer from '../components/Footer';
 
 const libraries = ['places'];
 

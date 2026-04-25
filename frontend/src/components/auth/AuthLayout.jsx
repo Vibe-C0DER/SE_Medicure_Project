@@ -85,7 +85,7 @@ const AuthLayout = ({ children }) => {
             {children}
           </div>
           <div className="mt-12 text-center pb-8">
-            <p className="text-xs text-gray-400">© 2023 MediCure Health Inc. All rights reserved.</p>
+            <p className="text-xs text-gray-400">© 2026 MediCure Health Inc. All rights reserved.</p>
           </div>
         </div>
       </div>

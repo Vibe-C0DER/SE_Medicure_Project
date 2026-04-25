@@ -221,7 +221,7 @@ const Register = () => {
                 </svg>
               </div>
               <span className="ml-3 text-xs text-gray-600 leading-relaxed">
-                I agree to the <Link to="#" className="text-medicure-pink hover:underline font-medium">Terms of Service</Link> and <Link to="#" className="text-medicure-pink hover:underline font-medium">Privacy Policy</Link>.
+                I agree to the <Link to="/terms" className="text-medicure-pink hover:underline font-medium">Terms of Service</Link> and <Link to="/privacy" className="text-medicure-pink hover:underline font-medium">Privacy Policy</Link>.
               </span>
             </label>
           </div>
