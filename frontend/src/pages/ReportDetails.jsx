@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { getReportById, downloadReportPDF } from '../api/report';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const ReportDetails = () => {
   const { id } = useParams();
@@ -178,6 +179,7 @@ const ReportDetails = () => {
           </div>
         </div>
       </main>
+      <Footer />
     </div>
   );
 };

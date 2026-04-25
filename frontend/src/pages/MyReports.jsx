@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { getMyReports, downloadReportPDF } from '../api/report';
 import Navbar from '../components/Navbar';
+import Footer from '../components/Footer';
 
 const MyReports = () => {
   const [reports, setReports] = useState([]);
@@ -154,6 +155,7 @@ const MyReports = () => {
           </>
         )}
       </main>
+      <Footer />
     </div>
   );
 };

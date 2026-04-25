@@ -1,5 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import { toggleSymptom, removeSymptom } from '../store/symptomSlice.js';
 import { fetchSymptoms } from '../api/symptoms.js';
 import { predictDiseases } from '../api/prediction.js';
 import { aiApi } from '../api/ai.js';
@@ -105,7 +107,8 @@ const SymptomInput = () => {
   const [query, setQuery] = useState('');
   const [activeChip, setActiveChip] = useState('All Symptoms');
   const [allSymptoms, setAllSymptoms] = useState(() => FALLBACK_SYMPTOMS);
-  const [selectedIds, setSelectedIds] = useState([]);
+  const dispatch = useDispatch();
+  const selectedIds = useSelector((state) => state.symptoms.selectedIds || []);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [saveError, setSaveError] = useState('');
@@ -194,15 +197,12 @@ const SymptomInput = () => {
     return selectedIds.map((id) => byId.get(id)).filter(Boolean);
   }, [selectedIds, allSymptoms]);
 
-  const toggleSymptom = (id) => {
-    setSelectedIds((prev) => {
-      if (prev.includes(id)) return prev.filter((x) => x !== id);
-      return [id, ...prev];
-    });
+  const handleToggleSymptom = (id) => {
+    dispatch(toggleSymptom(id));
   };
 
-  const removeSelected = (id) => {
-    setSelectedIds((prev) => prev.filter((x) => x !== id));
+  const handleRemoveSelected = (id) => {
+    dispatch(removeSymptom(id));
   };
 
   const progressPercent = useMemo(() => {
@@ -494,7 +494,7 @@ const SymptomInput = () => {
                       key={symptom.id}
                       symptom={symptom}
                       checked={selectedSet.has(symptom.id)}
-                      onToggle={toggleSymptom}
+                      onToggle={handleToggleSymptom}
                     />
                   ))}
                 </div>
@@ -559,7 +559,7 @@ const SymptomInput = () => {
                       </div>
                       <button
                         type="button"
-                        onClick={() => removeSelected(s.id)}
+                        onClick={() => handleRemoveSelected(s.id)}
                         className="text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-all p-2 rounded-lg"
                         title="Remove symptom"
                         aria-label={`Remove ${s.name}`}

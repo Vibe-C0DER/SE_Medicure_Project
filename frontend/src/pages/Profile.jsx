@@ -1,10 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Navbar from '../components/Navbar';
-import { getMe, updateMe } from '../api/user';
-import { setCredentials } from '../store/authSlice';
+import { getMe, updateMe, deleteUser } from '../api/user';
+import { setCredentials, logout } from '../store/authSlice';
 import { validateProfile } from '../utils/validation/profile.validation';
+import Footer from '../components/Footer';
 
 const Profile = () => {
   const dispatch = useDispatch();
@@ -18,6 +19,8 @@ const Profile = () => {
   const [avatarUploading, setAvatarUploading] = useState(false);
   const [digestSaving, setDigestSaving] = useState(false);
   const avatarInputRef = useRef(null);
+  const navigate = useNavigate();
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const derivedFullname = useMemo(() => {
     const first = authUser?.firstName || '';
@@ -208,6 +211,22 @@ const Profile = () => {
     };
 
     run();
+  };
+
+  const handleDeleteAccount = async () => {
+    if (!window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
+      return;
+    }
+    
+    setIsDeleting(true);
+    try {
+      await deleteUser();
+      dispatch(logout());
+      navigate('/');
+    } catch (err) {
+      setError(err.response?.data?.message || err.message || 'Failed to delete account.');
+      setIsDeleting(false);
+    }
   };
 
   const handleDiscard = () => {
@@ -568,14 +587,19 @@ const Profile = () => {
                     This action cannot be undone. All your personal data, medical history, appointments, and saved specialists will be permanently removed from MediCure servers.
                   </p>
                 </div>
-                <button className="shrink-0 px-5 py-2.5 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 rounded-xl text-sm font-semibold hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/40 transition-all shadow-sm">
-                  Delete Account
+                <button 
+                  onClick={handleDeleteAccount}
+                  disabled={isDeleting}
+                  className="shrink-0 px-5 py-2.5 bg-white dark:bg-red-950 border border-red-200 dark:border-red-800/50 text-red-600 dark:text-red-400 rounded-xl text-sm font-semibold hover:bg-red-50 hover:border-red-300 dark:hover:bg-red-900/40 transition-all shadow-sm"
+                >
+                  {isDeleting ? 'Deleting...' : 'Delete Account'}
                 </button>
               </div>
             </div>
           </main>
         </div>
       </div>
+      <Footer />
     </div>
   );
 };

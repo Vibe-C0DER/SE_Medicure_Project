@@ -2,6 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getArticleByDiseaseId } from '../api/articles.api';
+import Footer from '../components/Footer';
 
 const DISEASE_THEMES = {
   'Migraine': {
@@ -77,7 +78,7 @@ const getSeverityUI = (severity) => {
   return { label: '', pillClass: '' };
 };
 
-const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLocating }) => {
+const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLocating, onLocateAll, onEmergency }) => {
   const topDiseaseName = topDisease?.name || '';
   // Keep sidebar close to html prototype for now (hardcoded to match the UX demo content).
   const list =
@@ -138,7 +139,7 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLo
               <div className="bg-[#db2777]/10 p-2 rounded-lg text-[#db2777]">
                 <span className="material-symbols-outlined text-[24px]">medical_services</span>
               </div>
-              <h3 className="text-lg font-bold text-secondary">Recommended Specialists</h3>
+              <h3 className="text-lg font-bold text-primary">Recommended Specialists</h3>
             </div>
             <p className="text-xs text-pink-500 font-medium ml-1">
               Based on "{topDiseaseName || 'your selection'}"{typeof topMatchPercentage === 'number' ? ` (${topMatchPercentage}% match)` : ' (match)'}
@@ -174,7 +175,11 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLo
                   <p className="text-xs text-gray-500 leading-snug mt-1.5 mb-2">{s.description}</p>
                     <div className="flex flex-col gap-2 w-full mt-3">
                     <button 
-                        onClick={(e) => { e.preventDefault(); onFindNearby?.(); }}
+                        onClick={(e) => { 
+                          e.preventDefault(); 
+                          const searchTarget = (idx === 0 && topDisease?.specialist) ? topDisease.specialist : s.title;
+                          onFindNearby?.(searchTarget); 
+                        }}
                         disabled={isLocating}
                         className="w-max text-xs font-semibold text-[#db2777] bg-[#db2777]/5 px-3 py-1.5 rounded-lg hover:bg-[#db2777]/10 transition-colors flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed">
                         {isLocating ? 'Finding your location...' : (
@@ -192,9 +197,12 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLo
         </div>
 
         <div className="p-4 bg-pink-50 border-t border-pink-100">
-          <button className="w-full bg-[#db2777] hover:bg-[#be123c] text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-pink-200 hover:shadow-pink-300 transform hover:-translate-y-0.5">
+          <button 
+            onClick={(e) => { e.preventDefault(); onLocateAll?.(); }}
+            disabled={isLocating}
+            className="w-full bg-[#db2777] hover:bg-[#be123c] text-white font-bold py-2.5 rounded-xl text-sm transition-all flex items-center justify-center gap-2 shadow-lg shadow-pink-200 hover:shadow-pink-300 transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none">
             <span className="material-symbols-outlined text-[18px]">map</span>
-            Locate All Specialists on Map
+            {isLocating ? 'Locating...' : 'Locate All Specialists on Map'}
           </button>
         </div>
       </div>
@@ -210,8 +218,11 @@ const RecommendedSidebar = ({ topDisease, topMatchPercentage, onFindNearby, isLo
           If you are experiencing severe symptoms like chest pain, difficulty breathing, or severe
           bleeding, call emergency services immediately.
         </p>
-        <button className="text-white bg-red-600 hover:bg-red-700 py-2 rounded-lg text-xs font-bold uppercase tracking-wide shadow-md transition-colors text-center w-full">
-          Find Nearest Emergency Room
+        <button 
+          onClick={(e) => { e.preventDefault(); onEmergency?.(); }}
+          disabled={isLocating}
+          className="text-white bg-red-600 hover:bg-red-700 py-2 rounded-lg text-xs font-bold uppercase tracking-wide shadow-md transition-colors text-center w-full disabled:opacity-50 disabled:cursor-not-allowed">
+          {isLocating ? 'Locating...' : 'Find Nearest Emergency Room'}
         </button>
       </div>
     </>
@@ -255,7 +266,7 @@ const PredictionResult = () => {
     }
   };
 
-  const handleFindNearby = () => {
+  const handleFindNearby = (customSpecialist) => {
     setIsLocating(true);
     setLocationError(null);
     if (!navigator.geolocation) {
@@ -263,6 +274,7 @@ const PredictionResult = () => {
       setLocationError('Your browser does not support location services.');
       return;
     }
+    const finalSpecialist = typeof customSpecialist === 'string' ? customSpecialist : specialist;
     navigator.geolocation.getCurrentPosition(
       (position) => {
         setIsLocating(false);
@@ -270,7 +282,7 @@ const PredictionResult = () => {
           state: {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude,
-            specialist: specialist
+            specialist: finalSpecialist
           }
         });
       },
@@ -401,13 +413,13 @@ const PredictionResult = () => {
               </div>
 
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-2">
-                <h2 className="text-secondary text-2xl font-bold leading-tight flex items-center gap-2">
+                <h2 className="text-primary text-2xl font-bold leading-tight flex items-center gap-2">
                   Potential Conditions
                   <span className="bg-pink-100 text-pink-700 text-xs px-2 py-1 rounded-full font-bold">
                     {resultCount} Results
                   </span>
                 </h2>
-                <div className="flex flex-wrap gap-3">
+                {/* <div className="flex flex-wrap gap-3">
                   <button className="group flex h-10 items-center justify-center gap-x-2 rounded-full bg-white border border-pink-200 px-5 hover:bg-pink-50 hover:border-pink-300 transition-all shadow-sm">
                     <span className="text-secondary text-sm font-semibold">Sort by Match %</span>
                     <span className="material-symbols-outlined text-[20px] text-pink-400 group-hover:text-[#db2777] transition-transform group-hover:rotate-180">
@@ -418,7 +430,7 @@ const PredictionResult = () => {
                     <span className="material-symbols-outlined text-[20px] text-pink-400">filter_list</span>
                     <span className="text-secondary text-sm font-semibold">Filters</span>
                   </button>
-                </div>
+                </div> */}
               </div>
 
               <div className="flex flex-col gap-6">
@@ -532,6 +544,8 @@ const PredictionResult = () => {
                 topMatchPercentage={topMatchPercentage} 
                 onFindNearby={handleFindNearby}
                 isLocating={isLocating}
+                onLocateAll={() => handleFindNearby('specialist doctors near me')}
+                onEmergency={() => handleFindNearby('Emergency Hospital')}
               />
               {locationError && (
                 <div className="bg-red-50 text-red-600 p-4 rounded-xl text-sm border border-red-100 flex items-start gap-2 shadow-sm">
@@ -543,7 +557,7 @@ const PredictionResult = () => {
           </div>
         </div>
 
-        <footer className="bg-white border-t border-pink-100 mt-auto">
+        {/* <footer className="bg-white border-t border-pink-100 mt-auto">
           <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8 py-10 flex flex-col md:flex-row justify-between items-center gap-6">
             <div className="flex flex-col gap-1">
               <div className="flex items-center gap-2 text-secondary">
@@ -570,7 +584,8 @@ const PredictionResult = () => {
             </div>
             <p className="text-xs text-pink-300 font-medium">© 2024 MediCure Inc. All rights reserved.</p>
           </div>
-        </footer>
+        </footer> */}
+        <Footer />
       </div>
     </div>
   );

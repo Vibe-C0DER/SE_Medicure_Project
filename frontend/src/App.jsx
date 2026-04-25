@@ -29,6 +29,9 @@ import AdminContact from './pages/admin/AdminContact';
 import Contact from './pages/Contact';
 import ForgotPassword from './pages/ForgotPassword';
 import ResetPassword from './pages/ResetPassword';
+import TermsOfService from './pages/TermsOfService';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CookiePolicy from './pages/CookiePolicy';
 import { getMe } from './api/user';
 import { setCredentials, logout } from './store/authSlice';
 
@@ -112,6 +115,9 @@ function App() {
           <Route path="/articles/:id" element={<Article />} />
           <Route path="/specialists" element={<SpecialistMap />} />
           <Route path="/about" element={<About />} />
+          <Route path="/terms" element={<TermsOfService />} />
+          <Route path="/privacy" element={<PrivacyPolicy />} />
+          <Route path="/cookie" element={<CookiePolicy />} />
           <Route 
             path="/contact" 
             element={
