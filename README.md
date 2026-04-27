@@ -177,11 +177,11 @@ Please ensure that your code adheres to the existing styling and includes approp
 This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Author / Credits
-Developed by : 
+**Developed by:**
 
-Group 8 :
-202512023 - Kush Dani
-202512026 - Darshan Prajapati
-202512093 - Mayank Jayswal
-202512115 - Rohit Peswani
+**Group 8**
+- 202512023 — Kush Dani
+- 202512026 — Darshan Prajapati
+- 202512093 — Mayank Jayswal
+- 202512115 — Rohit Peswani
 
