@@ -19,6 +19,7 @@ import adminDashboardRouter from './routes/admin/admin.dashboard.routes.js';
 import adminUsersRouter from './routes/admin/admin.users.routes.js';
 import contactRouter from './routes/contact.route.js';
 import adminContactRouter from './routes/admin/admin.contact.routes.js';
+import mapsRouter from './routes/maps.route.js';
 import connectDB from './db/connectDB.js';
 
 dotenv.config();
@@ -36,7 +37,7 @@ app.use(
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
-
+app.set("trust proxy", 1);
 app.use('/api/auth', authRouter);
 app.use('/api/users', userRouter);
 app.use('/api/symptoms', symptomRouter);
@@ -53,6 +54,7 @@ app.use('/api/admin/reports', adminReportRouter);
 app.use('/api/admin/dashboard', adminDashboardRouter);
 app.use('/api/admin/users', adminUsersRouter);
 app.use('/api/admin/contact', adminContactRouter);
+app.use('/api/maps', mapsRouter);
 
 
 app.use((err, req, res, next) => {
