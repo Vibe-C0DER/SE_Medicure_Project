@@ -24,6 +24,7 @@ const MyReports = () => {
         setError('Failed to fetch reports');
       }
     } catch (err) {
+      console.log('reports error :', err.message);
       setError(err.response?.data?.message || 'Error fetching reports');
     } finally {
       setLoading(false);

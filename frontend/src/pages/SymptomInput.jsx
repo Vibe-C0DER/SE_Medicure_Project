@@ -207,12 +207,15 @@ const SymptomInput = () => {
 
   const progressPercent = useMemo(() => {
     const denom = Math.max(1, allSymptoms.length);
-    return Math.min(100, Math.round((selectedIds.length / denom) * 100));
-  }, [selectedIds.length, allSymptoms.length]);
+    return Math.min(100, Math.round((selectedSymptoms.length / denom) * 100));
+  }, [selectedSymptoms.length, allSymptoms.length]);
 
   const handleAnalyze = async () => {
-    console.log('selectedIds', selectedIds);
-    const validation = validateSymptomSelection(selectedIds);
+    // Only send IDs that exist in the loaded DB symptoms array
+    const validSelectedIds = selectedSymptoms.map(s => s.id);
+    
+    console.log('validSelectedIds', validSelectedIds);
+    const validation = validateSymptomSelection(validSelectedIds);
     if (!validation.success) {
       setSaveError(validation.errors.selectedIds);
       return;
@@ -222,7 +225,8 @@ const SymptomInput = () => {
       setSaveError('');
       setAnalyzing(true);
       // The backend expects symptom MongoDB IDs.
-      const predictionResponse = await predictDiseases(selectedIds);
+      const predictionResponse = await predictDiseases(validSelectedIds);
+      console.log(selectedIds);
       console.log('predictionResponse', predictionResponse);
       const predictionPayload = predictionResponse?.data || {};
 
@@ -233,6 +237,7 @@ const SymptomInput = () => {
       // No need to set local "submitted" state since we redirect.
     } catch (err) {
       const isNetworkError = !err?.status;
+      console.log("prediction error",err.message)
       if (isNetworkError) {
         setSaveError('Unable to connect to server');
       } else {
@@ -524,7 +529,7 @@ const SymptomInput = () => {
                   <h3 className="text-xl font-bold text-gray-900 dark:text-white">Selected</h3>
                 </div>
                 <span className="bg-primary text-white text-sm font-bold px-3 py-1 rounded-full shadow-sm">
-                  {selectedIds.length}
+                  {selectedSymptoms.length}
                 </span>
               </div>
               <p className="text-sm text-slate-500 dark:text-gray-300">
@@ -577,7 +582,7 @@ const SymptomInput = () => {
                 <button
                   type="button"
                   onClick={handleAnalyze}
-                  disabled={selectedIds.length === 0 || analyzing}
+                  disabled={selectedSymptoms.length === 0 || analyzing}
                   className="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 px-6 rounded-2xl shadow-lg shadow-primary/30 hover:shadow-primary/40 transition-all duration-300 flex items-center justify-center gap-3 group transform active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed"
                 >
                   <span className="material-symbols-outlined text-2xl">medical_services</span>

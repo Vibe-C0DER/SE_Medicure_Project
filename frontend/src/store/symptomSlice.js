@@ -1,4 +1,5 @@
 import { createSlice } from '@reduxjs/toolkit';
+import { logout } from './authSlice.js';
 
 const symptomSlice = createSlice({
   name: 'symptoms',
@@ -22,6 +23,11 @@ const symptomSlice = createSlice({
       state.selectedIds = [];
     },
   },
+  extraReducers: (builder) => {
+    builder.addCase(logout, (state) => {
+      state.selectedIds = [];
+    });
+  }
 });
 
 export const { toggleSymptom, removeSymptom, clearSymptoms } = symptomSlice.actions;
