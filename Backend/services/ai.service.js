@@ -15,7 +15,7 @@ export const extractSymptomsFromText = async (text) => {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash-latest" }); // Fast and suitable for json extraction
+    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash-lite" }); // Fast and suitable for json extraction
 
     const prompt = `You are a medical assistant.
 
