@@ -266,7 +266,7 @@ const Article = () => {
               </div>
 
               {/* Find a Specialist Card */}
-              <div className="bg-white rounded-2xl shadow-card border border-pink-100 p-6 relative overflow-hidden group">
+              {/* <div className="bg-white rounded-2xl shadow-card border border-pink-100 p-6 relative overflow-hidden group">
                 <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-500">
                    <div className="size-32 bg-pink-100 rounded-full blur-2xl absolute -top-10 -right-10"></div>
                 </div>
@@ -297,7 +297,7 @@ const Article = () => {
                     <p className="text-xs text-red-500 mt-2">{locationError}</p>
                   )}
                 </div>
-              </div>
+              </div> */}
 
             </aside>
 

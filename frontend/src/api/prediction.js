@@ -2,7 +2,7 @@ import api from './axios.js';
 
 export const predictDiseases = async (symptomIds) => {
   try {
-    const res = await api.post('/api/predict', { symptoms: symptomIds });
+    const res = await api.post('/api/predict', { symptoms: symptomIds }, {withCredentials : true});
     return res?.data;
   } catch (err) {
     // Bubble up the most useful error message for the UI.
