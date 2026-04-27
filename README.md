@@ -173,8 +173,6 @@ VITE_GOOGLE_CLIENT_ID=your_google_oauth_client_id
 
 Please ensure that your code adheres to the existing styling and includes appropriate tests if applicable.
 
-## License
-This project is licensed under the MIT License - see the LICENSE file for details.
 
 ## Author / Credits
 **Developed by:**
