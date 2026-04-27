@@ -59,7 +59,11 @@ export const signin = async (req, res, next) => {
     const userObj = validUser.toObject ? validUser.toObject() : validUser._doc || {};
     const { password: _p, ...rest } = userObj;
     res
-      .cookie('access_token', token, { httpOnly: true, sameSite: 'lax', secure: false })
+      .cookie('access_token', token, { 
+          httpOnly: true, 
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+          secure: process.env.NODE_ENV === 'production'
+      })
       .status(200)
       .json({
         success: true,
@@ -147,7 +151,11 @@ export const googleLogin = async (req, res, next) => {
     const { password: _p, ...rest } = userObj;
     
     res
-      .cookie('access_token', token, { httpOnly: true, sameSite: 'lax', secure: false })
+      .cookie('access_token', token, { 
+          httpOnly: true, 
+          sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax', 
+          secure: process.env.NODE_ENV === 'production'
+      })
       .status(200)
       .json({
         success: true,
