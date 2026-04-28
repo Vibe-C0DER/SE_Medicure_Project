@@ -59,89 +59,89 @@ export const getAllArticles = async (req, res) => {
 //     return res.status(500).json({ message: 'Failed to process request', error: error.message });
 //   }
 // };
-// export const getArticleByDiseaseId = async (req, res) => {
-//   try {
-//     const { diseaseId } = req.params;
+export const getArticleByDiseaseId = async (req, res) => {
+  try {
+    const { diseaseId } = req.params;
 
-//     const disease = await Disease.findById(diseaseId);
-//     if (!disease) {
-//       return res.status(404).json({ message: 'Disease not found' });
-//     }
+    const disease = await Disease.findById(diseaseId);
+    if (!disease) {
+      return res.status(404).json({ message: 'Disease not found' });
+    }
 
-//     // ✅ 1. If article already exists → return
-//     if (disease.article) {
-//       const article = await Article.findById(disease.article)
-//         .populate('disease', 'name severity specialist');
+    
+    if (disease.article) {
+      const article = await Article.findById(disease.article)
+        .populate('disease', 'name severity specialist');
 
-//       if (article) {
-//         return res.status(200).json(article);
-//       }
-//     }
+      if (article) {
+        return res.status(200).json(article);
+      }
+    }
 
-//     let generatedData = null;
+    let generatedData = null;
 
-//     // ✅ 2. Try AI generation (SAFE CALL)
-//     try {
-//       generatedData = await generateDiseaseArticle(disease.name);
-//     } catch (aiError) {
-//       console.error("AI generation failed:", aiError.message);
-//     }
+   
+    try {
+      generatedData = await generateDiseaseArticle(disease.name);
+    } catch (aiError) {
+      console.error("AI generation failed:", aiError.message);
+    }
 
-//     // ✅ 3. If AI SUCCESS → save + return
-//     if (generatedData && generatedData.title) {
-//       const newArticle = new Article({
-//         title: generatedData.title,
-//         description: generatedData.description,
-//         content: generatedData.content,
-//         symptoms: generatedData.symptoms,
-//         riskFactors: generatedData.riskFactors,
-//         prevention: generatedData.prevention,
-//         category: generatedData.category,
-//         disease: disease._id,
-//       });
+    
+    if (generatedData && generatedData.title) {
+      const newArticle = new Article({
+        title: generatedData.title,
+        description: generatedData.description,
+        content: generatedData.content,
+        symptoms: generatedData.symptoms,
+        riskFactors: generatedData.riskFactors,
+        prevention: generatedData.prevention,
+        category: generatedData.category,
+        disease: disease._id,
+      });
 
-//       await newArticle.save();
+      await newArticle.save();
 
-//       disease.article = newArticle._id;
-//       await disease.save();
+      disease.article = newArticle._id;
+      await disease.save();
 
-//       await newArticle.populate('disease', 'name severity specialist');
+      await newArticle.populate('disease', 'name severity specialist');
 
-//       return res.status(201).json(newArticle);
-//     }
+      return res.status(201).json(newArticle);
+    }
 
-//     // ❌ 4. AI FAILED → fallback from DB
-//     console.log("⚠️ Falling back to DB");
+ 
+    console.log("⚠️ Falling back to DB");
 
-//     const fallbackArticle = await Article.findOne({
-//       disease: disease._id,
-//       isActive: true
-//     }).populate('disease', 'name severity specialist');
+    const fallbackArticle = await Article.findOne({
+      disease: disease._id,
+      isActive: true
+    }).populate('disease', 'name severity specialist');
 
-//     if (fallbackArticle) {
-//       return res.status(200).json(fallbackArticle);
-//     }
+    if (fallbackArticle) {
+      return res.status(200).json(fallbackArticle);
+    }
 
-//     // 🧠 5. LAST FALLBACK → minimal response (important for UX)
-//     return res.status(200).json({
-//       title: disease.name,
-//       description: `Information about ${disease.name} is currently limited.`,
-//       content: `Details for ${disease.name} are not available right now. Please try again later.`,
-//       symptoms: "No symptom data available.",
-//       riskFactors: "No risk factor data available.",
-//       prevention: "No prevention data available.",
-//       category: disease.category || "General",
-//       disease: disease
-//     });
+    
+    return res.status(200).json({
+      title: disease.name,
+      description: `Information about ${disease.name} is currently limited.`,
+      content: `Details for ${disease.name} are not available right now. Please try again later.`,
+      symptoms: "No symptom data available.",
+      riskFactors: "No risk factor data available.",
+      prevention: "No prevention data available.",
+      category: disease.category || "General",
+      disease: disease
+    });
 
-//   } catch (error) {
-//     console.error('Error fetching/generating article:', error);
-//     return res.status(500).json({
-//       message: 'Failed to process request',
-//       error: error.message
-//     });
-//   }
-// };
+  } catch (error) {
+    console.error('Error fetching/generating article:', error);
+    return res.status(500).json({
+      message: 'Failed to process request',
+      error: error.message
+    });
+  }
+};
 export const getArticleById = async (req, res) => {
   try {
     const { id } = req.params;
